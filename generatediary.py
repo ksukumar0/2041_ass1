@@ -1,6 +1,6 @@
 #!/usr/bin/python
 
-import subprocess, sys, re
+import subprocess, sys, re, string
 
 gitcmd = "git log";
 
@@ -11,7 +11,10 @@ log = subprocess.Popen(gitcmd.split(), stdout=subprocess.PIPE)
 output = log.communicate()[0]
 regex = ".*Date(.*)"
 
-print output;
+for line in output.splitlines():
+	if re.match(regex,line) :
+		print line
+
 
 # @statarray = split /"\n"/, $status;
 # # print @statarray;
