@@ -2,6 +2,8 @@
 
 import subprocess, sys, re, string
 
+# Courtesy of Stack Overflow 
+# git log --pretty=format:"%h%x09%an%x09%ad%x09%s"
 gitcmd = "git log --pretty=format:\"%x01%an%x09%ad%x09%s\"";
 
 # Courtesy of Stack Overflow 
