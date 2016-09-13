@@ -4,6 +4,7 @@ import subprocess, sys, re, string
 
 # Courtesy of Stack Overflow 
 # git log --pretty=format:"%h%x09%an%x09%ad%x09%s"
+
 gitcmd = "git log --pretty=format:\"%x01%an%x09%ad%x09%s\"";
 
 # Courtesy of Stack Overflow 
@@ -18,16 +19,3 @@ for line in output.splitlines():
 	line = re.sub('"','',line)
 	line = re.sub('^\ +','',line)
 	print line
-
-
-
-# @statarray = split /"\n"/, $status;
-# # print @statarray;
-# foreach	$tmp (@statarray)
-# {
-# 	if ($tmp =~ /$regex/)
-# 	{print $tmp;}
-# 	else {}
-# 	# {print "$tmp";}
-
-# }
