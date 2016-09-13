@@ -1,0 +1,7 @@
+Karthik Sukumar	Tue Sep 13 13:13:16 2016 +1000	deleted some useless stuff
+Karthik Sukumar	Tue Sep 13 11:28:08 2016 +1000	Credited Stackoverflow for some help
+Karthik Sukumar	Tue Sep 13 09:41:25 2016 +1000	Got what is necessary for Diary
+Karthik Sukumar	Tue Sep 13 09:32:36 2016 +1000	extracted date
+Karthik Sukumar	Tue Sep 13 07:46:31 2016 +1000	added generatediary.p[ly] to extract log information from git log
+Karthik Sukumar	Thu Sep 8 21:42:30 2016 +1000	Diary first line deleted
+Andrew taylor	Sat Sep 3 18:16:15 2016 +1000	files supplied to start the assignment
