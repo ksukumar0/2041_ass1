@@ -7,9 +7,9 @@
 
 # Variable and Regex definitions
 
-$comment_code_regex = qr/(.*\"[^"]*\#[^"]*\"\;)(#.*)/;
-$commentline_regex = qr/([^"']*#[^"']*)/;
-$comment_inbegin_regex = qr/^\s*(#.*)/;
+# $comment_code_regex = qr/(.*\"[^"]*\#[^"]*\"\;)(#.*)/;
+# $commentline_regex = qr/(.*)([^"']*#[^"']*)/;
+$comment_regex = qr/(?:^\s*#.*|^\s*$)/;
 
 sub handle_shebang
 {
@@ -22,39 +22,43 @@ sub handle_shebang
     }
     return 1;
 }
+
 sub handle_comment
 {
     my ($trans) = @_;
-    # my (@array) =~ /$comment_code_regex/ ,$trans;
-    # print join @array,"\n";
     my ($code, $comment);
-    if ($trans =~ /$comment_inbegin_regex/)
+    if ($trans =~ /$comment_regex/)
     {
-        print "TRY 1";
-        print $1,"\n";
+        # print "TRY 1 ";
+        print $trans,"\n";
+        return 0;
     }
-    elsif ($trans =~ /$commentline_regex/)
-    {
-        print "TRY 2";
-        print $1,"\n";
-    }
-    elsif ($trans =~ /$comment_code_regex/)
-    {
-        $code = $1;
-        $comment = $2;
-        print "TRY 3";
-        print $code," ",$comment,"\n";
-    }
+    return 1;
+    # elsif ($trans =~ /$commentline_regex/)
+    # {
+    #     print "TRY 2";
+    #     print "Code:", $1, "Comment:",$2,"\n";
+    # }
+    # elsif ($trans =~ /$comment_code_regex/g)
+    # {
+    #     $code = $1;
+    #     $comment = $2;
+    #     print "TRY 3";
+    #     print $code," ",$comment,"\n";
+    # }
 }
 
-
+$lineno = 0;
 while ($line = <>) 
 {
+    $lineno++;
     chomp $line;
+    
     if (!handle_shebang($line))         #Handle Shebang line and move to the next line
     {next;}
-    handle_comment($line);
-
+    print $lineno, " ";
+    if (!handle_comment($line))             #Handles Codes with Comments
+    {next;}
     # elsif ($line =~ /^\s*#/ || $line =~ /^\s*$/) 
     # {
     #     # Blank & comment lines can be passed unchanged

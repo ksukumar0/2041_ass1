@@ -12,6 +12,7 @@ while ($line = <>)
 	$i++;
 	# print $i, " ";
 	if ($i %2 == 0)
-	{next;}				#	exit loop
-print $i, " ",$line;
+	{next;}				
+	#	exit loop
+print $i, "####",$line;
 }
