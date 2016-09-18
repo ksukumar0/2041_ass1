@@ -71,7 +71,7 @@ sub handle_print
             $tmp = $1;
             $variable_print =~ s/$variable_in_print_regex/\%d/g;
             $variable_print =~ s/\)[;\s]*$//;
-            print $variable_print,"\%",$tmp,"\n";
+            print $variable_print,"\%",$tmp,"\)\n";
         }
         else
         {print $variable_print,"\n";}

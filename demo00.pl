@@ -11,4 +11,4 @@ print "simple demo statements with newlines\n";
 print "\tprint\twith\ttabs";
 
 
-print "$var";
+print "$var\n";
