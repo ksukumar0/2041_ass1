@@ -22,8 +22,8 @@ sub handle_shebang
     if ($line =~ /^#!/ && $. == 1) 
     {
         # translate #! line   
-        print "#!/usr/local/bin/python3.5 -u\n";
-        return 0;
+        return print "#!/usr/local/bin/python3.5 -u\n";
+        # return 0;
     }
     return 1;
 }
@@ -56,30 +56,41 @@ sub handle_print
     my ($trans) = @_;
     my $variable_print;
     my $tmp;
+    my $variable_in_print_regex = qr/\$(\w*\b)/;
 
 #print simple variables if the line only has variables
     # if ($variable_print =~ 
     
-    #print plain strings without processing
-
+    #print plain strings below which have a newline in them
     if ($trans =~ /$print_regex/)
     {
         $variable_print = "print\(\"$1\"\) ";
         
-        $variable_print =~ s/\$(\w*\b)/\%d/g;
-        $tmp = $1;
-        $variable_print =~ s/\)[;\s]*$//;
-        print $variable_print,"\%",$tmp,")\n";
+        if ($variable_print =~ /$variable_in_print_regex/)
+        {
+            $tmp = $1;
+            $variable_print =~ s/$variable_in_print_regex/\%d/g;
+            $variable_print =~ s/\)[;\s]*$//;
+            print $variable_print,"\%",$tmp,"\n";
+        }
+        else
+        {print $variable_print,"\n";}
         return 0;
     }
+
+    #print plain strings below which have no newline in them
     elsif ($trans =~ /$print_without_nl_regex/)
     {
-        $variable_print = "print\(\"$1\",end=\"\"\)";
-
-        $variable_print =~ s/\$(\w*\b)/\%d/g;
-        $tmp = $1;
-        $variable_print =~ s/\)[;\s]*$//;
-        print $variable_print,"\%",$tmp,")\n";
+        $variable_print = "print\(\"$1\"";           # print(BLAH, end="") 
+        if ($variable_print =~ /$variable_in_print_regex/)
+        {
+            $tmp = $1;
+            $variable_print =~ s/$variable_in_print_regex/\%d/g;
+            $variable_print =~ s/\)[;\s]*$//;
+            print $variable_print,"\%",$tmp,",end=\"\"\)\n";
+        }
+        else
+        {print $variable_print,",end=\"\"\)","\n";}
         return 0;
     }
 
