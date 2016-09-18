@@ -62,16 +62,19 @@ sub handle_print
     my $variable_print;
     my $tmp;
     my $variable_in_print_regex = qr/\$(\w*\b)/;
+    my $r;
+    my $loc;
 
 #print simple variables if the line only has variables without newline
     if ($trans =~ /$print_only_var_without_nl_regex/)
     {
+        # print "TRY 1";
         my $temp;
         $variable_print = $1;
         # @variables = $trans =~ /\$(\w*\b)/g;      
         $variable_print =~ s/(\$)(\w*\b)/$2/g;
         $variable_print =~ s/[;\s]*$//g;
-        $temp = "print\($variable_print,end=\"\"\)";
+        $temp = "print\($variable_print,end=\"\"\)\n";
 
         push (@pyarray,$temp);
 
@@ -80,12 +83,12 @@ sub handle_print
 #print simple variables if the line only has variables without newline
     elsif ($trans =~ /$print_only_var_regex/)
     {
+        # print "TRY 2";
         $variable_print = $1;
-        # @variables = $trans =~ /\$(\w*\b)/g;      
         $variable_print =~ s/(\$)(\w*\b)/$2/g;
         $variable_print =~ s/[;\s]*$//g;
 
-        $temp = "print\( $variable_print \)";
+        $temp = "print\( $variable_print \)\n";
         push (@pyarray,$temp);
         return 0;
     }
@@ -93,18 +96,32 @@ sub handle_print
 #print plain strings below which have a newline in them
     if ($trans =~ /$print_regex/)
     {
+        # print "TRY 3";
         $variable_print = "print\(\"$1\"\) ";
-        
+        @variables = $trans =~ /\$(\w*\b)/g;
+
         if ($variable_print =~ /$variable_in_print_regex/)
         {
-            $tmp = $1;
+            # print "TRY 4";
             $variable_print =~ s/$variable_in_print_regex/\%d/g;
             $variable_print =~ s/\)[;\s]*$//;
-            $temp = "$variable_print \%$tmp \)\n";
+
+            if(scalar @variables == 1)
+            {
+                # print "TRY 5";
+                $temp = "$variable_print \%@variables \)\n";
+            }
+            else
+            {
+            # print "TRY 6";
+                $r = join (",",@variables);
+                $temp = "$variable_print \%\($r\) \)\n";
+            }
             push (@pyarray, $temp);
         }
         else
         {
+            # print "TRY 7";
             $temp = $variable_print."\n";
             push(@pyarray,$temp);
         }
@@ -114,12 +131,27 @@ sub handle_print
     elsif ($trans =~ /$print_without_nl_regex/)
     {
         $variable_print = "print\(\"$1\"";           # print(BLAH, end="") 
+        @variables = $trans =~ /\$(\w*\b)/g;
+
         if ($variable_print =~ /$variable_in_print_regex/)
         {
-            $tmp = $1;
+            # $tmp = $1;
             $variable_print =~ s/$variable_in_print_regex/\%d/g;
             $variable_print =~ s/\)[;\s]*$//;
-            $temp = "$variable_print \%$tmp,end=\"\"\)\n";
+
+            if(scalar @variables == 1)
+            {
+                # print "TRY 5";
+                $temp = "$variable_print \%@variables \)\n";
+            }
+            else
+            {
+            # print "TRY 6";
+                $r = join (",",@variables);
+                $temp = "$variable_print \%\($r\) \)\n";
+            }
+
+            # $temp = "$variable_print \%$tmp,end=\"\"\)\n";
             push(@pyarray,$temp);
         }
         else
@@ -134,12 +166,14 @@ return 1;
 
 sub handle_variable
 {
+
+##### Transforms $variable to variable #####
+
     my ($trans) = @_;
     if ($trans =~ /^\s*\$(.*)/)
     {
         $trans =~ s/(\$)(.*?)/$2/g;
         $trans =~ s/[\s;]*$//;
-        # print $trans,"\n";
         push (@pyarray,$trans."\n");
     }
 return 0;
@@ -156,10 +190,10 @@ while ($line = <>)
 
     # print $lineno, " ";
 
-    if (!handle_print($line))           # Handles prints
+    if (!handle_comment($line))         # Handles Codes with Comments
     {next;}
 
-    if (!handle_comment($line))         # Handles Codes with Comments
+    if (!handle_print($line))           # Handles prints
     {next;}
 
     if (!handle_variable($line))        # Handles variable declarations
