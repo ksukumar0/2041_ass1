@@ -12,6 +12,7 @@
 
 $comment_regex = qr/(?:(^\s*#.*)|(^\s*$))/;
 $print_regex = qr/^\s*print\s*"(.*)\\n"[\s;]*$/;
+$print_only_var_regex = qr/^\s*print\s*([^"].*)[\s;]*$/;
 $print_without_nl_regex = qr/^\s*print\s*"(.*)"[\s;]*$/;
 
 
@@ -55,7 +56,11 @@ sub handle_print
     my ($trans) = @_;
     my $variable_print;
     my $tmp;
-#print plain strings without processing
+
+#print simple variables if the line only has variables
+    # if ($variable_print =~ 
+    
+    #print plain strings without processing
 
     if ($trans =~ /$print_regex/)
     {
@@ -77,9 +82,6 @@ sub handle_print
         print $variable_print,"\%",$tmp,")\n";
         return 0;
     }
-
-#print simple variables if the line only has variables
-    # if ($variable_print =~ 
 
 return 1;
 }
@@ -115,15 +117,4 @@ while ($line = <>)
 
     if (!handle_variable($line))        # Handles variable declarations
     {next;}
-       
-    # } elsif ($line =~ /^\s*print\s*"(.*)\\n"[\s;]*$/) {
-    #     # Python's print adds a new-line character by default
-    #     # so we need to delete it from the Perl print statement
-        
-    #     print "print(\"$1\")\n";
-    # } else {
-    #     # Lines we can't translate are turned into comments
-        
-    #     print "#$line\n";
-    # }
 }
