@@ -18,5 +18,14 @@ $str = "print \$karthik * \$karthik";
 if ($str =~ /\$(\w*\b)/)
 {print "Yes\n";}
 
-print @arr;
-# print join (@arr,"\t");
+@array = qw(one two three four five six seven eight);
+@array = reverse @array;
+
+foreach $p (@array)
+{
+	print $p,"\n";
+}
+
+# print @arr;
+$_ = join ("\t",@arr);
+print $_;

@@ -1,3 +1,6 @@
+Karthik Sukumar	Sun Sep 18 15:00:29 2016 +1000	improved print algorithm
+Karthik Sukumar	Sun Sep 18 14:30:36 2016 +1000	demo00.pl and corresponding python have the same output
+Karthik Sukumar	Sun Sep 18 14:02:40 2016 +1000	works with answer[0123].pl
 Karthik Sukumar	Sun Sep 18 13:21:21 2016 +1000	works with answer0.pl
 Karthik Sukumar	Sun Sep 18 12:12:05 2016 +1000	Added demo00.pl with simple print statements and the corresponding python code works
 Karthik Sukumar	Sun Sep 18 11:49:55 2016 +1000	handles simple print statements

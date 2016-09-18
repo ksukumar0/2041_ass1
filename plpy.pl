@@ -12,18 +12,22 @@
 
 $comment_regex = qr/(?:(^\s*#.*)|(^\s*$))/;
 $print_regex = qr/^\s*print\s*"(.*)\\n"[\s;]*$/;
-$print_only_var_regex = qr/^\s*print\s*([^"].*)[\s;]*$/;
 $print_without_nl_regex = qr/^\s*print\s*"(.*)"[\s;]*$/;
 
+$print_only_var_without_nl_regex = qr/^\s*print\s*([^"]*)[\s;]*$/;
+$print_only_var_regex = qr/^\s*print\s*([^"]*)\s*,\s*".*\\n"[\s;]*$/;
+
+# $match_perl_line_endings = qr/[;\s]*$/;
+# @python = {}; # Global python array which needs to be printed at the end
 
 sub handle_shebang
 {
     my ($trans) = @_;
     if ($line =~ /^#!/ && $. == 1) 
     {
-        # translate #! line   
-        return print "#!/usr/local/bin/python3.5 -u\n";
-        # return 0;
+        # translate #! line  
+        print "#!/usr/local/bin/python3.5 -u\n";
+        return 0;
     }
     return 1;
 }
@@ -56,12 +60,30 @@ sub handle_print
     my ($trans) = @_;
     my $variable_print;
     my $tmp;
-    my $variable_in_print_regex = qr/\$(\w*\b)/;
+    # my $variable_in_print_regex = qr/\$(\w*\b)/;
 
-#print simple variables if the line only has variables
-    # if ($variable_print =~ 
-    
-    #print plain strings below which have a newline in them
+#print simple variables if the line only has variables without newline
+    if ($trans =~ /$print_only_var_without_nl_regex/)
+    {
+        $variable_print = $1;
+        # @variables = $trans =~ /\$(\w*\b)/g;      
+        $variable_print =~ s/(\$)(\w*\b)/$2/g;
+        $variable_print =~ s/[;\s]*$//g;
+        print "print\(",$variable_print,",end=\"\"\)";
+        return 0;
+    }
+#print simple variables if the line only has variables without newline
+    elsif ($trans =~ /$print_only_var_regex/)
+    {
+        $variable_print = $1;
+        # @variables = $trans =~ /\$(\w*\b)/g;      
+        $variable_print =~ s/(\$)(\w*\b)/$2/g;
+        $variable_print =~ s/[;\s]*$//g;
+        print "print\(",$variable_print,"\)";
+        return 0;
+    }
+
+#print plain strings below which have a newline in them
     if ($trans =~ /$print_regex/)
     {
         $variable_print = "print\(\"$1\"\) ";
@@ -77,8 +99,7 @@ sub handle_print
         {print $variable_print,"\n";}
         return 0;
     }
-
-    #print plain strings below which have no newline in them
+#print plain strings below which have no newline in them
     elsif ($trans =~ /$print_without_nl_regex/)
     {
         $variable_print = "print\(\"$1\"";           # print(BLAH, end="") 
@@ -93,7 +114,6 @@ sub handle_print
         {print $variable_print,",end=\"\"\)","\n";}
         return 0;
     }
-
 return 1;
 }
 
