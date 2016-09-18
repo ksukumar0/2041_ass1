@@ -10,7 +10,9 @@
 # $comment_code_regex = qr/(.*\"[^"]*\#[^"]*\"\;)(#.*)/;
 # $commentline_regex = qr/(.*)([^"']*#[^"']*)/;
 $comment_regex = qr/(?:^\s*#.*|^\s*$)/;
-$print_regex = qr/^\s*print\s*"(.*)(\\n)+"[\s;]*$/;
+$print_regex = qr/^\s*print\s*"(.*)\\n"[\s;]*$/;
+$print_without_nl_regex = qr/^\s*print\s*"(.*)"[\s;]*$/;
+
 sub handle_shebang
 {
     my ($trans) = @_;
@@ -52,13 +54,13 @@ sub handle_print
     my ($trans) = @_;
     if ($trans =~ /$print_regex/)
     {
-        if (! defined $2)
-        {print "print\(\"$1\",end=\"\"\)","\n";}
-        else
-        {print "print\(\"$1\"\) " ,"\n";}
-        return 0;
+        print "print\(\"$1\"\) " ,"\n";
     }
-    return 1;
+    elsif ($trans =~ /$print_without_nl_regex/)
+    {
+        print "print\(\"$1\",end=\"\"\)","\n";
+    }
+return 0;
 }
 
 $lineno = 0;
@@ -70,8 +72,10 @@ while ($line = <>)
     if (!handle_shebang($line))         # Handle Shebang line and move to the next line
     {next;}
     # print $lineno, " ";
+    
     if (!handle_comment($line))         # Handles Codes with Comments
     {next;}
+    
     if (!handle_print($line))           # Handles prints
     {next;}
    
