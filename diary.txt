@@ -1,3 +1,4 @@
+Karthik Sukumar	Tue Sep 13 14:22:14 2016 +1000	written to Diary.txt
 Karthik Sukumar	Tue Sep 13 13:13:16 2016 +1000	deleted some useless stuff
 Karthik Sukumar	Tue Sep 13 11:28:08 2016 +1000	Credited Stackoverflow for some help
 Karthik Sukumar	Tue Sep 13 09:41:25 2016 +1000	Got what is necessary for Diary
