@@ -18,7 +18,7 @@ $print_only_var_without_nl_regex = qr/^\s*print\s*([^"]*)[\s;]*$/;
 $print_only_var_regex = qr/^\s*print\s*([^"]*)\s*,\s*".*\\n"[\s;]*$/;
 
 # $match_perl_line_endings = qr/[;\s]*$/;
-# @python = {}; # Global python array which needs to be printed at the end
+my @pyarray; # Global python array which needs to be printed at the end
 
 sub handle_shebang
 {
@@ -26,7 +26,7 @@ sub handle_shebang
     if ($line =~ /^#!/ && $. == 1) 
     {
         # translate #! line  
-        print "#!/usr/local/bin/python3.5 -u\n";
+        push (@pyarray, "#!/usr/local/bin/python3.5 -u\n");
         return 0;
     }
     return 1;
@@ -38,7 +38,8 @@ sub handle_comment
     # my ($code, $comment);
     if ($trans =~ /$comment_regex/)
     {
-        print $trans,"\n";
+        $trans .="\n"; 
+        push(@pyarray, $trans);
         return 0;
     }
     return 1;
@@ -65,11 +66,15 @@ sub handle_print
 #print simple variables if the line only has variables without newline
     if ($trans =~ /$print_only_var_without_nl_regex/)
     {
+        my $temp;
         $variable_print = $1;
         # @variables = $trans =~ /\$(\w*\b)/g;      
         $variable_print =~ s/(\$)(\w*\b)/$2/g;
         $variable_print =~ s/[;\s]*$//g;
-        print "print\(",$variable_print,",end=\"\"\)";
+        $temp = "print\($variable_print,end=\"\"\)";
+
+        push (@pyarray,$temp);
+
         return 0;
     }
 #print simple variables if the line only has variables without newline
@@ -79,7 +84,9 @@ sub handle_print
         # @variables = $trans =~ /\$(\w*\b)/g;      
         $variable_print =~ s/(\$)(\w*\b)/$2/g;
         $variable_print =~ s/[;\s]*$//g;
-        print "print\(",$variable_print,"\)";
+
+        $temp = "print\( $variable_print \)";
+        push (@pyarray,$temp);
         return 0;
     }
 
@@ -93,10 +100,14 @@ sub handle_print
             $tmp = $1;
             $variable_print =~ s/$variable_in_print_regex/\%d/g;
             $variable_print =~ s/\)[;\s]*$//;
-            print $variable_print,"\%",$tmp,"\)\n";
+            $temp = "$variable_print \%$tmp \)\n";
+            push (@pyarray, $temp);
         }
         else
-        {print $variable_print,"\n";}
+        {
+            $temp = $variable_print."\n";
+            push(@pyarray,$temp);
+        }
         return 0;
     }
 #print plain strings below which have no newline in them
@@ -108,10 +119,14 @@ sub handle_print
             $tmp = $1;
             $variable_print =~ s/$variable_in_print_regex/\%d/g;
             $variable_print =~ s/\)[;\s]*$//;
-            print $variable_print,"\%",$tmp,",end=\"\"\)\n";
+            $temp = "$variable_print \%$tmp,end=\"\"\)\n";
+            push(@pyarray,$temp);
         }
         else
-        {print $variable_print,",end=\"\"\)","\n";}
+        {
+            $temp = "$variable_print,end=\"\"\)\n";
+            push(@pyarray,$temp);
+        }
         return 0;
     }
 return 1;
@@ -124,7 +139,8 @@ sub handle_variable
     {
         $trans =~ s/(\$)(.*?)/$2/g;
         $trans =~ s/[\s;]*$//;
-        print $trans,"\n";
+        # print $trans,"\n";
+        push (@pyarray,$trans."\n");
     }
 return 0;
 }
@@ -149,3 +165,5 @@ while ($line = <>)
     if (!handle_variable($line))        # Handles variable declarations
     {next;}
 }
+
+print @pyarray;

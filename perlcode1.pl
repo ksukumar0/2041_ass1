@@ -18,14 +18,24 @@ $str = "print \$karthik * \$karthik";
 if ($str =~ /\$(\w*\b)/)
 {print "Yes\n";}
 
-@array = qw(one two three four five six seven eight);
-@array = reverse @array;
+$variable_print = "finally";
 
-foreach $p (@array)
+$t1 = "print\(,$variable_print,end=\"\"\)";
+$t1 .= "\n";
+push @array,$t1;
+
+# print join('\n', @array);
+
+@arr1 = qw(one two three four five six seven eight);
+push(@arr1,@array);
+@arr1 = reverse @arr1;
+$i = 0;
+foreach $p (@arr1)
 {
+	$i++;
+	print "item".$i," ";
 	print $p,"\n";
 }
-
 # print @arr;
-$_ = join ("\t",@arr);
-print $_;
+# $_ = join ("\t",@arr);
+# print $_;
