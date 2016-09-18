@@ -9,9 +9,11 @@
 
 # $comment_code_regex = qr/(.*\"[^"]*\#[^"]*\"\;)(#.*)/;
 # $commentline_regex = qr/(.*)([^"']*#[^"']*)/;
-$comment_regex = qr/(?:^\s*#.*|^\s*$)/;
+
+$comment_regex = qr/(?:(^\s*#.*)|(^\s*$))/;
 $print_regex = qr/^\s*print\s*"(.*)\\n"[\s;]*$/;
 $print_without_nl_regex = qr/^\s*print\s*"(.*)"[\s;]*$/;
+
 
 sub handle_shebang
 {
@@ -31,7 +33,6 @@ sub handle_comment
     # my ($code, $comment);
     if ($trans =~ /$comment_regex/)
     {
-        # print "TRY 1 ";
         print $trans,"\n";
         return 0;
     }
@@ -52,13 +53,45 @@ sub handle_comment
 sub handle_print
 {
     my ($trans) = @_;
+    my $variable_print;
+    my $tmp;
+#print plain strings without processing
+
     if ($trans =~ /$print_regex/)
     {
-        print "print\(\"$1\"\) " ,"\n";
+        $variable_print = "print\(\"$1\"\) ";
+        
+        $variable_print =~ s/\$(\w*\b)/\%d/g;
+        $tmp = $1;
+        $variable_print =~ s/\)[;\s]*$//;
+        print $variable_print,"\%",$tmp,")\n";
+        return 0;
     }
     elsif ($trans =~ /$print_without_nl_regex/)
     {
-        print "print\(\"$1\",end=\"\"\)","\n";
+        $variable_print = "print\(\"$1\",end=\"\"\)";
+
+        $variable_print =~ s/\$(\w*\b)/\%d/g;
+        $tmp = $1;
+        $variable_print =~ s/\)[;\s]*$//;
+        print $variable_print,"\%",$tmp,")\n";
+        return 0;
+    }
+
+#print simple variables if the line only has variables
+    # if ($variable_print =~ 
+
+return 1;
+}
+
+sub handle_variable
+{
+    my ($trans) = @_;
+    if ($trans =~ /^\s*\$(.*)/)
+    {
+        $trans =~ s/(\$)(.*?)/$2/g;
+        $trans =~ s/[\s;]*$//;
+        print $trans,"\n";
     }
 return 0;
 }
@@ -71,14 +104,18 @@ while ($line = <>)
     
     if (!handle_shebang($line))         # Handle Shebang line and move to the next line
     {next;}
+
     # print $lineno, " ";
-    
-    if (!handle_comment($line))         # Handles Codes with Comments
-    {next;}
-    
+
     if (!handle_print($line))           # Handles prints
     {next;}
-   
+
+    if (!handle_comment($line))         # Handles Codes with Comments
+    {next;}
+
+    if (!handle_variable($line))        # Handles variable declarations
+    {next;}
+       
     # } elsif ($line =~ /^\s*print\s*"(.*)\\n"[\s;]*$/) {
     #     # Python's print adds a new-line character by default
     #     # so we need to delete it from the Perl print statement
