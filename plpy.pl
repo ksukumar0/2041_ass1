@@ -60,7 +60,7 @@ sub handle_print
     my ($trans) = @_;
     my $variable_print;
     my $tmp;
-    # my $variable_in_print_regex = qr/\$(\w*\b)/;
+    my $variable_in_print_regex = qr/\$(\w*\b)/;
 
 #print simple variables if the line only has variables without newline
     if ($trans =~ /$print_only_var_without_nl_regex/)
