@@ -1,6 +1,7 @@
 #!/usr/bin/perl -w
 
-print "hello";	#prints hello
+print "hello";	
+#prints hello
 print "\n";
 # while (<>)
 # {
@@ -14,5 +15,5 @@ while ($line = <>)
 	if ($i %2 == 0)
 	{next;}				
 	#	exit loop
-print $i, "####",$line;
+print $i;
 }

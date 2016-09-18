@@ -10,7 +10,7 @@
 # $comment_code_regex = qr/(.*\"[^"]*\#[^"]*\"\;)(#.*)/;
 # $commentline_regex = qr/(.*)([^"']*#[^"']*)/;
 $comment_regex = qr/(?:^\s*#.*|^\s*$)/;
-
+$print_regex = qr/^\s*print\s*"(.*)(\\n)+"[\s;]*$/;
 sub handle_shebang
 {
     my ($trans) = @_;
@@ -26,7 +26,7 @@ sub handle_shebang
 sub handle_comment
 {
     my ($trans) = @_;
-    my ($code, $comment);
+    # my ($code, $comment);
     if ($trans =~ /$comment_regex/)
     {
         # print "TRY 1 ";
@@ -47,6 +47,19 @@ sub handle_comment
     #     print $code," ",$comment,"\n";
     # }
 }
+sub handle_print
+{
+    my ($trans) = @_;
+    if ($trans =~ /$print_regex/)
+    {
+        if (! defined $2)
+        {print "print\(\"$1\",end=\"\"\)","\n";}
+        else
+        {print "print\(\"$1\"\) " ,"\n";}
+        return 0;
+    }
+    return 1;
+}
 
 $lineno = 0;
 while ($line = <>) 
@@ -54,15 +67,14 @@ while ($line = <>)
     $lineno++;
     chomp $line;
     
-    if (!handle_shebang($line))         #Handle Shebang line and move to the next line
+    if (!handle_shebang($line))         # Handle Shebang line and move to the next line
     {next;}
-    print $lineno, " ";
-    if (!handle_comment($line))             #Handles Codes with Comments
+    # print $lineno, " ";
+    if (!handle_comment($line))         # Handles Codes with Comments
     {next;}
-    # elsif ($line =~ /^\s*#/ || $line =~ /^\s*$/) 
-    # {
-    #     # Blank & comment lines can be passed unchanged
-    #     print $line;
+    if (!handle_print($line))           # Handles prints
+    {next;}
+   
     # } elsif ($line =~ /^\s*print\s*"(.*)\\n"[\s;]*$/) {
     #     # Python's print adds a new-line character by default
     #     # so we need to delete it from the Perl print statement
