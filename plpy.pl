@@ -19,7 +19,7 @@ $print_only_var_regex = qr/^\s*print\s*([^"]*)\s*,\s*".*\\n"[\s;]*$/;
 
 # $match_perl_line_endings = qr/[;\s]*$/;
 my @pyarray; # Global python array which needs to be printed at the end
-
+my %vartype;
 sub handle_shebang
 {
     my ($trans) = @_;
@@ -168,11 +168,24 @@ sub handle_variable
 {
 
 ##### Transforms $variable to variable #####
-
     my ($trans) = @_;
+    my $var;
     if ($trans =~ /^\s*\$(.*)/)
     {
+        print $trans,"\t";
+        @var = $trans =~ /\$(\w+)/g;
+
         $trans =~ s/(\$)(.*?)/$2/g;
+
+        foreach $i (@var)
+        {
+            if ($trans =~ /$i.+\./)
+                {$vartype{$i} = '%f';}
+            elsif ($trans =~ /$i.+\".*\"/)
+                {$vartype{$i} = '%s';}
+            elsif
+                {$vartype{$i} = '%d';}
+        }
         $trans =~ s/[\s;]*$//;
         push (@pyarray,$trans."\n");
     }
@@ -201,3 +214,4 @@ while ($line = <>)
 }
 
 print @pyarray;
+# print "\n",%vartype;

@@ -39,3 +39,9 @@ foreach $p (@arr1)
 # print @arr;
 # $_ = join ("\t",@arr);
 # print $_;
+
+$str = '$var3 = $var12 * $var2;';
+my @var = $str =~ /\$(\w+)/g;
+# if ($str =~ /\$(.*)/)
+# {print $1;}
+print @var;
