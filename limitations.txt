@@ -7,3 +7,6 @@ print "$var12 is not even", "\t", $var13, "this number is odd";
 * will not translate properly
 
 Variable type recognition
+
+Code + comment
+* The compiler will have trouble if the code and comment are placed on the same line. This needs to be handled.

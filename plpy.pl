@@ -103,7 +103,7 @@ sub handle_print
         if ($variable_print =~ /$variable_in_print_regex/)
         {
             # print "TRY 4";
-            $variable_print =~ s/$variable_in_print_regex/\%d/g;
+            $variable_print =~ s/$variable_in_print_regex/$vartype{$1}/ge;
             $variable_print =~ s/\)[;\s]*$//;
 
             if(scalar @variables == 1)
@@ -136,7 +136,7 @@ sub handle_print
         if ($variable_print =~ /$variable_in_print_regex/)
         {
             # $tmp = $1;
-            $variable_print =~ s/$variable_in_print_regex/\%d/g;
+            $variable_print =~ s/$variable_in_print_regex/$vartype{$1}/ge;
             $variable_print =~ s/\)[;\s]*$//;
 
             if(scalar @variables == 1)
@@ -172,18 +172,16 @@ sub handle_variable
     my $var;
     if ($trans =~ /^\s*\$(.*)/)
     {
-        print $trans,"\t";
-        @var = $trans =~ /\$(\w+)/g;
+        @var = $trans =~ /\$(\w+)/g;    # Extracting variable names
+        $trans =~ s/(\$)(.*?)/$2/g;     # replacing $var with var
 
-        $trans =~ s/(\$)(.*?)/$2/g;
-
-        foreach $i (@var)
+        foreach $i (@var)               # this loop determines the variable type and places them in a hash
         {
             if ($trans =~ /$i.+\./)
                 {$vartype{$i} = '%f';}
             elsif ($trans =~ /$i.+\".*\"/)
                 {$vartype{$i} = '%s';}
-            elsif
+            else
                 {$vartype{$i} = '%d';}
         }
         $trans =~ s/[\s;]*$//;
@@ -214,4 +212,3 @@ while ($line = <>)
 }
 
 print @pyarray;
-# print "\n",%vartype;

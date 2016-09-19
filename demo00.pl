@@ -4,6 +4,7 @@
 
 $var = 6;
 $var2 = 7;
+$fltnum = 42.42;
 
 $var3 = $var * $var2;
 $str = "howdy";
@@ -17,3 +18,7 @@ print $var * $var2;
 print "The answer to Life is $var3 which is also $var x $var2";
 
 print "\n$var x $var2 = $var3\n";
+
+print "$str is how americans say hi\n";
+
+print "$fltnum is the answer to life";
