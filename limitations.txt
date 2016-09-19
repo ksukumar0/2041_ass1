@@ -1,0 +1,9 @@
+# Karthik Sukumar
+# Limitations of plpy.pl
+
+Print statements
+*	complex print statements like
+print "$var12 is not even", "\t", $var13, "this number is odd"; 
+* will not translate properly
+
+Variable type recognition
