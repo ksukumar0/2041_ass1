@@ -16,6 +16,8 @@ $print_without_nl_regex = qr/^\s*print\s*"(.*)"[\s;]*$/;
 
 $print_only_var_without_nl_regex = qr/^\s*print\s*([^"]*)[\s;]*$/;
 $print_only_var_regex = qr/^\s*print\s*([^"]*)\s*,\s*".*\\n"[\s;]*$/;
+$ctrlstmtrgx = qr/(?:^\s*[#]*(while|if|elsif|else if|else|foreach|for))/;
+
 
 # $match_perl_line_endings = qr/[;\s]*$/;
 
@@ -37,7 +39,6 @@ sub handle_shebang
 sub handle_comment
 {
     my ($trans) = @_;
-    # my ($code, $comment);
     if ($trans =~ /$comment_regex/)
     {
         $trans .="\n"; 
@@ -45,18 +46,6 @@ sub handle_comment
         return 0;
     }
     return 1;
-    # elsif ($trans =~ /$commentline_regex/)
-    # {
-    #     print "TRY 2";
-    #     print "Code:", $1, "Comment:",$2,"\n";
-    # }
-    # elsif ($trans =~ /$comment_code_regex/g)
-    # {
-    #     $code = $1;
-    #     $comment = $2;
-    #     print "TRY 3";
-    #     print $code," ",$comment,"\n";
-    # }
 }
 sub handle_print
 {
@@ -193,13 +182,21 @@ sub handle_variable
 return 1;
 }
 
-# sub handle_controlstatements
-# {
-# ##### Transforms $variable to variable #####
-#     my ($trans) = @_;
+sub handle_controlstatements
+{
+##### Transforms $variable to variable #####
+    my ($trans) = @_;
 
-    
-# }
+    if ( $trans =~ /{?\s*$/ )
+    {$trans =~ s/\s*{?$/\:/;}
+    if ( $trans =~ /$ctrlstmtrgx/ )
+    {
+        # print $trans;
+        push (@pyarray,$trans."\n");
+        return 0;
+    }
+return 1;
+}
 
 $lineno = 0;
 while ($line = <>) 
@@ -217,23 +214,37 @@ while ($line = <>)
     if (!handle_print($line))           # Handles prints
     {next;}
 
+    if (!handle_controlstatements($line))
+    {next;}                             # Handles control statements like while/for/foreach etc...
+
     if (!handle_variable($line))        # Handles variable declarations
     {next;}
-
-    # if (!handle_controlstatements($line))
-    # {next;}
 
     push (@pyarray , "#".$line."\n");   # else comment the code and print it out
 }
 
+my $endbrace = qr/^\s*#*}\s*$/;
 ##### Print the python code #####
 foreach $i (@pyarray)
 {
     print "\t"x$pytabindent;
-    print $i;
-    if ($i =~ /(?:^\s*[#](while|if|foreach|for))/ )
-    {$pytabindent++;}
-    elsif($i =~ /[#]}\s*$/)
-    {if($pytabindent>0) {$pytabindent--;}}
+    # print $i,"\n";
+
+    if ($i =~ /$endbrace/)
+    {}                                  # Avoid printing closing braces
+    else
+    {print $i;}                         # Else print other statements 
+
+
+##### If there is a control statement increment the tab indent for the next line by 1 #####
+
+    if ($i =~ /$ctrlstmtrgx/ )
+    {$pytabindent++;}                   # Logic for indenting tabs
+    
+    if($i =~ /$endbrace/)
+    {
+        if($pytabindent>0)
+        {$pytabindent--;}
+    }
 }
 

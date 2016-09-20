@@ -49,3 +49,11 @@ $str2 = "world";
 $str3 = $str." ".$str2;
 
 print "\t"x4,$str3;
+$i = 1;
+my $ctrlstmtrgx = qr/#*}\s*$/;
+$trans = '}';
+	if ( $trans =~ /$ctrlstmtrgx/ )
+    {
+    	$i--;
+        print $trans,$i;
+    }
