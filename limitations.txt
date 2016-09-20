@@ -7,6 +7,10 @@ print "$var12 is not even", "\t", $var13, "this number is odd";
 * will not translate properly
 
 Variable type recognition
+* string concatnation isnt recognised by the compiler. e.g:
+$str = "hello";
+$str2 = "world";
+$str3 = $str.$str2;
 
 Code + comment
 * The compiler will have trouble if the code and comment are placed on the same line. This needs to be handled.

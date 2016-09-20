@@ -18,6 +18,8 @@ $print_only_var_without_nl_regex = qr/^\s*print\s*([^"]*)[\s;]*$/;
 $print_only_var_regex = qr/^\s*print\s*([^"]*)\s*,\s*".*\\n"[\s;]*$/;
 
 # $match_perl_line_endings = qr/[;\s]*$/;
+
+my $pytabindent = 0;
 my @pyarray; # Global python array which needs to be printed at the end
 my %vartype;
 sub handle_shebang
@@ -186,16 +188,24 @@ sub handle_variable
         }
         $trans =~ s/[\s;]*$//;
         push (@pyarray,$trans."\n");
+        return 0;
     }
-return 0;
+return 1;
 }
+
+# sub handle_controlstatements
+# {
+# ##### Transforms $variable to variable #####
+#     my ($trans) = @_;
+
+    
+# }
 
 $lineno = 0;
 while ($line = <>) 
 {
     $lineno++;
     chomp $line;
-    
     if (!handle_shebang($line))         # Handle Shebang line and move to the next line
     {next;}
 
@@ -209,6 +219,21 @@ while ($line = <>)
 
     if (!handle_variable($line))        # Handles variable declarations
     {next;}
+
+    # if (!handle_controlstatements($line))
+    # {next;}
+
+    push (@pyarray , "#".$line."\n");   # else comment the code and print it out
 }
 
-print @pyarray;
+##### Print the python code #####
+foreach $i (@pyarray)
+{
+    print "\t"x$pytabindent;
+    print $i;
+    if ($i =~ /(?:^\s*[#](while|if|foreach|for))/ )
+    {$pytabindent++;}
+    elsif($i =~ /[#]}\s*$/)
+    {if($pytabindent>0) {$pytabindent--;}}
+}
+

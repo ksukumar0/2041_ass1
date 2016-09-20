@@ -42,6 +42,10 @@ foreach $p (@arr1)
 
 $str = '$var3 = $var12 * $var2;';
 my @var = $str =~ /\$(\w+)/g;
-# if ($str =~ /\$(.*)/)
-# {print $1;}
-print @var;
+print @var,"\n";
+
+$str = "hello";
+$str2 = "world";
+$str3 = $str." ".$str2;
+
+print "\t"x4,$str3;
