@@ -191,11 +191,18 @@ sub handle_controlstatements
     {$trans =~ s/\s*{?$/\:/;}
     if ( $trans =~ /$ctrlstmtrgx/ )
     {
-        # print $trans;
+        # if any control statements are found push onto the array
         push (@pyarray,$trans."\n");
         return 0;
     }
 return 1;
+}
+
+sub handle_lastnext
+{
+    my ($trans) = @_;
+
+    if ()
 }
 
 $lineno = 0;
@@ -217,24 +224,26 @@ while ($line = <>)
     if (!handle_controlstatements($line))
     {next;}                             # Handles control statements like while/for/foreach etc...
 
+    if (!handle_lastnext($line))
+    {next;}
+
     if (!handle_variable($line))        # Handles variable declarations
     {next;}
 
     push (@pyarray , "#".$line."\n");   # else comment the code and print it out
 }
 
-my $endbrace = qr/^\s*#*}\s*$/;
+my $endbrace = qr/#*}\s*$/;
 ##### Print the python code #####
 foreach $i (@pyarray)
 {
-    print "\t"x$pytabindent;
-    # print $i,"\n";
-
     if ($i =~ /$endbrace/)
-    {}                                  # Avoid printing closing braces
+    {}                       # Avoid printing closing braces
     else
-    {print $i;}                         # Else print other statements 
-
+    {   
+        print "\t"x$pytabindent;
+        print $i;
+    }                                   # Else print other statements 
 
 ##### If there is a control statement increment the tab indent for the next line by 1 #####
 
@@ -244,7 +253,6 @@ foreach $i (@pyarray)
     if($i =~ /$endbrace/)
     {
         if($pytabindent>0)
-        {$pytabindent--;}
+        {$pytabindent--;}               # Decrease Indent when endbrace is found
     }
 }
-
