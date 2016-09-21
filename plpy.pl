@@ -11,12 +11,12 @@
 # $commentline_regex = qr/(.*)([^"']*#[^"']*)/;
 
 $comment_regex = qr/(?:(^\s*#.*)|(^\s*$))/;
-$print_regex = qr/^\s*print\s*"(.*)\\n"[\s;]*$/;
-$print_without_nl_regex = qr/^\s*print\s*"(.*)"[\s;]*$/;
+$print_regex = qr/^\s*print\s*"(.*)\\n"[\s;]*$/i;
+$print_without_nl_regex = qr/^\s*print\s*"(.*)"[\s;]*$/i;
 
-$print_only_var_without_nl_regex = qr/^\s*print\s*([^"]*)[\s;]*$/;
-$print_only_var_regex = qr/^\s*print\s*([^"]*)\s*,\s*".*\\n"[\s;]*$/;
-$ctrlstmtrgx = qr/(?:^\s*[#]*(while|if|elsif|else if|else|foreach|for))/;
+$print_only_var_without_nl_regex = qr/^\s*print\s*([^"]*)[\s;]*$/i;
+$print_only_var_regex = qr/^\s*print\s*([^"]*)\s*,\s*".*\\n"[\s;]*$/i;
+$ctrlstmtrgx = qr/(?:^\s*[#]*(while|if|elsif|else if|else|foreach|for))/i;
 
 
 # $match_perl_line_endings = qr/[;\s]*$/;
@@ -186,19 +186,23 @@ sub handle_controlstatements
 {
 ##### Transforms $variable to variable #####
     my ($trans) = @_;
-
+    my $transformed = 1;
     if ( $trans =~ /{?\s*$/ )
     {$trans =~ s/\s*{?$/\:/;}
     if ( $trans =~ /$ctrlstmtrgx/ )
     {
         # if any control statements are found push onto the array
         push (@pyarray,$trans."\n");
+        $transformed = 0;
     }
-    if ( $trans =~ /last\s*;\s*}$/ )
+    if ( $trans =~ /last\s*;\s*}?\s*:*$/ )
     {
-        $trans =~ s/last\s*;\s*}$/break/;
+        $trans =~ s/last\s*;\s*:*}?\s*:*$/break/;
+        $transformed = 0;
+        push (@pyarray,$trans."\n");
+
     }
-return 1;
+return $transformed;
 }
 
 $lineno = 0;
