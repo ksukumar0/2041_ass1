@@ -161,7 +161,19 @@ sub handle_variable
 ##### Transforms $variable to variable #####
     my ($trans) = @_;
     my $var;
-    if ($trans =~ /^\s*\$(.*)/)
+    my $transformed = 1;
+
+    if ($trans =~ /\+\+/)
+    {
+        $trans =~ s/\+\+/\+=1/g;
+        @var = $trans =~ /\$(\w+)/g;    # Extracting variable names
+        $trans =~ s/(\$)(.*?)/$2/g;     # replacing $var with var
+
+        $trans =~ s/[\s;]*$//;
+            push (@pyarray,$trans."\n");
+        $transformed = 0;
+    }
+    elsif ($trans =~ /^\s*\$(.*)/)
     {
         @var = $trans =~ /\$(\w+)/g;    # Extracting variable names
         $trans =~ s/(\$)(.*?)/$2/g;     # replacing $var with var
@@ -177,9 +189,10 @@ sub handle_variable
         }
         $trans =~ s/[\s;]*$//;
         push (@pyarray,$trans."\n");
-        return 0;
+        $transformed = 0;
     }
-return 1;
+
+return $transformed;
 }
 
 sub handle_controlstatements
@@ -187,21 +200,34 @@ sub handle_controlstatements
 ##### Transforms $variable to variable #####
     my ($trans) = @_;
     my $transformed = 1;
+    
+##### Handle open braces #####
     if ( $trans =~ /{?\s*$/ )
     {$trans =~ s/\s*{?$/\:/;}
+    
+##### Handle control statements #####
+    
     if ( $trans =~ /$ctrlstmtrgx/ )
     {
         # if any control statements are found push onto the array
+
+        $trans =~ s/(\$)(.*?)/$2/g;     # replacing $var with var
         push (@pyarray,$trans."\n");
         $transformed = 0;
     }
+
+##### Handle last statements #####
+
     if ( $trans =~ /last\s*;\s*}?\s*:*$/ )
     {
         $trans =~ s/last\s*;\s*:*}?\s*:*$/break/;
         $transformed = 0;
         push (@pyarray,$trans."\n");
-
+        $transformed = 0;
     }
+
+##### Handle next statements #####
+
 return $transformed;
 }
 
@@ -237,7 +263,8 @@ foreach $i (@pyarray)
     if ($i =~ /$endbrace/)
     {}                       # Avoid printing closing braces
     else
-    {   
+    {
+        $i =~ s/\t*\ *//g;
         print "\t"x$pytabindent;
         print $i;
     }                                   # Else print other statements 

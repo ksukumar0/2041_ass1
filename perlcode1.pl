@@ -44,16 +44,10 @@ $str = '$var3 = $var12 * $var2;';
 my @var = $str =~ /\$(\w+)/g;
 print @var,"\n";
 
-$str = "hello";
-$str2 = "world";
-$str3 = $str." ".$str2;
+$i = 0;
 
-print "\t"x4,$str3;
-$i = 1;
-my $ctrlstmtrgx = qr/#*}\s*$/;
-$trans = '}';
-	if ( $trans =~ /$ctrlstmtrgx/ )
-    {
-    	$i--;
-        print $trans,$i;
-    }
+while ($i < 10)
+{
+	$i++;
+	print "$i\n";
+}
