@@ -193,16 +193,12 @@ sub handle_controlstatements
     {
         # if any control statements are found push onto the array
         push (@pyarray,$trans."\n");
-        return 0;
+    }
+    if ( $trans =~ /last\s*;\s*}$/ )
+    {
+        $trans =~ s/last\s*;\s*}$/break/;
     }
 return 1;
-}
-
-sub handle_lastnext
-{
-    my ($trans) = @_;
-
-    if ()
 }
 
 $lineno = 0;
@@ -223,9 +219,6 @@ while ($line = <>)
 
     if (!handle_controlstatements($line))
     {next;}                             # Handles control statements like while/for/foreach etc...
-
-    if (!handle_lastnext($line))
-    {next;}
 
     if (!handle_variable($line))        # Handles variable declarations
     {next;}
