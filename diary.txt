@@ -1,3 +1,16 @@
+Karthik Sukumar	Wed Sep 21 22:48:22 2016 +1000	while loop runs successfully
+Karthik Sukumar	Wed Sep 21 21:42:41 2016 +1000	[minor Bug Fix] last now coverted to break
+Karthik Sukumar	Wed Sep 21 21:30:31 2016 +1000	Change in the while detection code
+Karthik Sukumar	Tue Sep 20 22:52:10 2016 +1000	[Bug Fix] fixed the control statement indent decrement issue
+Karthik Sukumar	Tue Sep 20 22:22:50 2016 +1000	[Debugging] trying to get control statement indent to work as expected
+Karthik Sukumar	Tue Sep 20 21:20:09 2016 +1000	prints tab indents with control statements
+Karthik Sukumar	Mon Sep 19 22:29:19 2016 +1000	handles floats and strings with complex print statements
+Karthik Sukumar	Mon Sep 19 22:17:51 2016 +1000	added functionality for program to recognise string variables and print them out in complex print statements, eg: print  is a string; will be print %s,%str
+Karthik Sukumar	Mon Sep 19 22:15:55 2016 +1000	Added text file called limitations explaining the limits of the plpy.pl compiler
+Karthik Sukumar	Sun Sep 18 18:19:21 2016 +1000	Printing optimisations
+Karthik Sukumar	Sun Sep 18 17:30:07 2016 +1000	modified the structure of the code so that all the converted code is stored in an array and printed out at the end
+Karthik Sukumar	Sun Sep 18 16:34:09 2016 +1000	typo fix
+Karthik Sukumar	Sun Sep 18 16:31:32 2016 +1000	passes all tests of subset0 and subset1
 Karthik Sukumar	Sun Sep 18 15:00:29 2016 +1000	improved print algorithm
 Karthik Sukumar	Sun Sep 18 14:30:36 2016 +1000	demo00.pl and corresponding python have the same output
 Karthik Sukumar	Sun Sep 18 14:02:40 2016 +1000	works with answer[0123].pl

@@ -228,6 +228,14 @@ sub handle_controlstatements
 
 ##### Handle next statements #####
 
+    if ( $trans =~ /next\s*;\s*}?\s*:*$/ )
+    {
+        $trans =~ s/next\s*;\s*:*}?\s*:*$/continue/;
+        $transformed = 0;
+        push (@pyarray,$trans."\n");
+        $transformed = 0;
+    }
+
 return $transformed;
 }
 
@@ -264,7 +272,7 @@ foreach $i (@pyarray)
     {}                       # Avoid printing closing braces
     else
     {
-        $i =~ s/\t*\ *//g;
+        $i =~ s/^\t*\ *//;
         print "\t"x$pytabindent;
         print $i;
     }                                   # Else print other statements 
