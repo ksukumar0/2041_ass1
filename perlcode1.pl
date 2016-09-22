@@ -44,10 +44,25 @@ $str = '$var3 = $var12 * $var2;';
 my @var = $str =~ /\$(\w+)/g;
 print @var,"\n";
 
-$i = 0;
+$thi = "Hi \"y'a||\"ll \"gonna\|\|\" || party \" hard";
+print $thi,"\n";
+$thi =~ s/([^"]*)(\"[^"]*\|\|[^"]*\")([^"]*)/$1$3/g;
+# $thi =~ s/\|\|/or/g;
+print $thi,"\n";
 
-while ($i < 10)
+
+sub handle
 {
-	$i++;
-	print "$i\n";
+	my ($trans) = @_;
+	$trans =~ s/my/your/g;
+	return $trans;
 }
+
+$thi = "This is my line";
+print $thi,"\n";
+$thi = handle($thi);
+print $thi;
+
+%hash = ("||" => "or", "&&" =>"and");
+
+print "\n",%hash;

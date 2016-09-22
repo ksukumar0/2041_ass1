@@ -195,8 +195,42 @@ sub handle_variable
 return $transformed;
 }
 
+sub handle_operators
+{
+    my %operators = (
+        "\\|\\|" => "or",
+        "&&" => "and",
+        "gt" => ">",
+        "lt" => "<",
+        "le" => "<=",
+        "ge" => ">=",
+        "eq" => "==",
+        "ne" => "!=",
+        );
+   my ($ctrlstmts) = @_;
+   my $j;
+   foreach $j (keys %operators)
+   {
+
+        if ( $j eq "\\|\\|" || $j eq "&&")
+        {
+            $ctrlstmts =~ s/$j/$operators{$j}/ge;
+        }
+        elsif ( $ctrlstmts =~ /\b$j\b/ )
+        {
+            $ctrlstmts =~ s/$j/$operators{$j}/ge;
+        }
+   }
+return $ctrlstmts;
+}
+
+##### This function has derived a lot of information from the following two webpages #####
+##### https://www.tutorialspoint.com/perl/perl_operators.htm #####
+##### http://www.tutorialspoint.com/python/python_basic_operators.htm #####
+
 sub handle_controlstatements
 {
+
 ##### Transforms $variable to variable #####
     my ($trans) = @_;
     my $transformed = 1;
@@ -212,6 +246,10 @@ sub handle_controlstatements
         # if any control statements are found push onto the array
 
         $trans =~ s/(\$)(.*?)/$2/g;     # replacing all $var with var
+
+        ##### Handle Operators #####
+        $trans = handle_operators($trans);
+
         push (@pyarray,$trans."\n");
         $transformed = 0;
     }
@@ -235,10 +273,6 @@ sub handle_controlstatements
         push (@pyarray,$trans."\n");
         $transformed = 0;
     }
-
-##### Handle Operators #####
-
-
 
 return $transformed;
 }
