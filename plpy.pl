@@ -209,9 +209,11 @@ sub handle_operators
         );
    my ($ctrlstmts) = @_;
    my $j;
+
+##### Loop through the operators and perform the change
+
    foreach $j (keys %operators)
    {
-
         if ( $j eq "\\|\\|" || $j eq "&&")
         {
             $ctrlstmts =~ s/$j/$operators{$j}/ge;
@@ -249,6 +251,9 @@ sub handle_controlstatements
 
         ##### Handle Operators #####
         $trans = handle_operators($trans);
+
+        if ($trans =~ /elsif/)
+        {$trans =~ s/elsif/elif/g;}
 
         push (@pyarray,$trans."\n");
         $transformed = 0;

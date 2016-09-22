@@ -58,11 +58,9 @@ sub handle
 	return $trans;
 }
 
-$thi = "This is my line";
-print $thi,"\n";
-$thi = handle($thi);
-print $thi;
+$thi = "ThiS and THat";
+if ($thi =~ /(This|That)+ and THAT/i)
+{print "\nMatched\n"}
+else
+{print "\nNot matched\n";}
 
-%hash = ("||" => "or", "&&" =>"and");
-
-print "\n",%hash;
