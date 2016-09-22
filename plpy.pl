@@ -216,14 +216,30 @@ sub handle_operators
    {
         if ( $j eq "\\|\\|" || $j eq "&&")
         {
-            $ctrlstmts =~ s/$j/$operators{$j}/ge;
+            $ctrlstmts =~ s/$j/$operators{$j}/ge;           # replace by the value
         }
         elsif ( $ctrlstmts =~ /\b$j\b/ )
         {
-            $ctrlstmts =~ s/$j/$operators{$j}/ge;
+            $ctrlstmts =~ s/$j/$operators{$j}/ge;           # replace by the value
         }
    }
 return $ctrlstmts;
+}
+
+sub handle_for
+{
+    my ($string) = @_;
+    my $for_regex = qr/(?:for|foreach)\s+(\w+?)\s+\((.*)\)/;
+
+    if ($string =~ /$for_regex/ )
+    {
+        my $ind = $1;
+        my $arr = $2;
+        $string =~ s/foreach/for/;          # convert Foreach to for
+        # $string =~ s///;                  #
+        # print $ind," ",$arr;
+    }
+return $string;
 }
 
 ##### This function has derived a lot of information from the following two webpages #####
@@ -254,6 +270,8 @@ sub handle_controlstatements
 
         if ($trans =~ /elsif/)
         {$trans =~ s/elsif/elif/g;}
+
+        $trans = handle_for($trans);
 
         push (@pyarray,$trans."\n");
         $transformed = 0;

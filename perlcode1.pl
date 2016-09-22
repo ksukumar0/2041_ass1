@@ -64,3 +64,12 @@ if ($thi =~ /(This|That)+ and THAT/i)
 else
 {print "\nNot matched\n";}
 
+$this = "foreach \$i (0..9)";
+$regex = qr/(?:for|foreach)\s+\$(\w+?)\s+\((.*)\)/;
+$this =~ $regex;
+print $1," ",$2,"\n";
+
+$this = "foreach \$i (\@random)";
+$regex = qr/(?:for|foreach)\s+\$(\w+?)\s+\(@(.*)\)/;
+$this =~ $regex;
+print $1," ",$2;
