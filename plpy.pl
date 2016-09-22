@@ -211,7 +211,7 @@ sub handle_controlstatements
     {
         # if any control statements are found push onto the array
 
-        $trans =~ s/(\$)(.*?)/$2/g;     # replacing $var with var
+        $trans =~ s/(\$)(.*?)/$2/g;     # replacing all $var with var
         push (@pyarray,$trans."\n");
         $transformed = 0;
     }
@@ -236,8 +236,16 @@ sub handle_controlstatements
         $transformed = 0;
     }
 
+##### Handle Operators #####
+
+
+
 return $transformed;
 }
+
+
+##### Main Code starts here... #####
+
 
 $lineno = 0;
 while ($line = <>) 
