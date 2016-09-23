@@ -94,6 +94,11 @@ sub handle_print
         if ($variable_print =~ /$variable_in_print_regex/)
         {
             # print "TRY 4";
+            if(!defined $vartype{$1})
+            {
+                $vartype{$1} = '%d';  
+            }
+
             $variable_print =~ s/$variable_in_print_regex/$vartype{$1}/ge;
             $variable_print =~ s/\)[;\s]*$//;
 
@@ -126,7 +131,10 @@ sub handle_print
 
         if ($variable_print =~ /$variable_in_print_regex/)
         {
-            # $tmp = $1;
+            if(!defined $vartype{$1})
+            {
+                $vartype{$1} = '%d';  
+            }
             $variable_print =~ s/$variable_in_print_regex/$vartype{$1}/ge;
             $variable_print =~ s/\)[;\s]*$//;
 
@@ -247,7 +255,7 @@ sub handle_for
             $arr = $1;
         }
 
-    $string = "for $ind in $arr";
+    $string = "for $ind in $arr :";
     }
 return $string;
 }

@@ -16,3 +16,6 @@ Code + comment
 * The compiler will have trouble if the code and comment are placed on the same line. This needs to be handled.
 
 Strings can be manipulated in control statements even if they are quoted 
+
+Control Loops
+* The for loops with in place letter lists liek (a..z) cant be converted into python
