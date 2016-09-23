@@ -247,7 +247,8 @@ sub handle_for
 
         if ( $arr =~ /\s*(\d+)\s*..\s*(\d+)\s*/)
         {
-            $arr = "range($1,$2)";
+            my $temp = $2+1;
+            $arr = "range($1,$temp)";
         }
 
         if ( $arr =~ /@(\w+)/)
