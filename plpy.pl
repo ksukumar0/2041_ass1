@@ -229,7 +229,7 @@ return $ctrlstmts;
 sub handle_for
 {
     my ($string) = @_;
-    my $for_regex = qr/(?:for|foreach)\s+(\w+?)\s+\((.*)\)/;
+    my $for_regex = qr/(?:for|foreach)(?:\s+(?:my)?\s+|\s+)(\w+?)\s+\((.*)\)/;
 
     if ($string =~ /$for_regex/ )
     {

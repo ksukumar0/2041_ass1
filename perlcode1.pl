@@ -58,18 +58,22 @@ sub handle
 	return $trans;
 }
 
-$thi = "ThiS and THat";
-if ($thi =~ /(This|That)+ and THAT/i)
-{print "\nMatched\n"}
+$string = 'for my $i (0..9)';
+print "\n$string";
+my $for_regex = qr/(?:for|foreach)(?:\s+(?:my)?\s+|\s+)\$(\w+?)\s+\((.*)\)/;
+
+if ($string =~ /$for_regex/)
+{print "\nMatched\n $1\t$2"}
 else
 {print "\nNot matched\n";}
 
-$this = "foreach \$i (0..9)";
-$regex = qr/(?:for|foreach)\s+\$(\w+?)\s+\((.*)\)/;
-$this =~ $regex;
-print $1," ",$2,"\n";
+# $this = "foreach \$i (0..9)";
+# $regex = qr/(?:for|foreach)\s+\$(\w+?)\s+\((.*)\)/;
+# $this =~ $regex;
+# print $1," ",$2,"\n";
 
-$this = "foreach \$i (\@random)";
-$regex = qr/(?:for|foreach)\s+\$(\w+?)\s+\(@(.*)\)/;
-$this =~ $regex;
-print $1," ",$2;
+# $this = "foreach \$i (\@random)";
+# $regex = qr/(?:for|foreach)\s+\$(\w+?)\s+\(@(.*)\)/;
+# $this =~ $regex;
+# print $1," ",$2;
+
