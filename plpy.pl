@@ -236,8 +236,18 @@ sub handle_for
         my $ind = $1;
         my $arr = $2;
         $string =~ s/foreach/for/;          # convert Foreach to for
-        # $string =~ s///;                  #
-        # print $ind," ",$arr;
+
+        if ( $arr =~ /\s*(\d+)\s*..\s*(\d+)\s*/)
+        {
+            $arr = "range($1,$2)";
+        }
+
+        if ( $arr =~ /@(\w+)/)
+        {
+            $arr = $1;
+        }
+
+    $string = "for $ind in $arr";
     }
 return $string;
 }

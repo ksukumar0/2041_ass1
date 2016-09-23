@@ -67,6 +67,9 @@ if ($string =~ /$for_regex/)
 else
 {print "\nNot matched\n";}
 
+
+foreach $a (ab..ad)
+{print "$a  ";}
 # $this = "foreach \$i (0..9)";
 # $regex = qr/(?:for|foreach)\s+\$(\w+?)\s+\((.*)\)/;
 # $this =~ $regex;
