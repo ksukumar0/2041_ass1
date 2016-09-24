@@ -83,7 +83,8 @@ $ctrlstmtrgx = qr/(?:^\s*[#]*(while|if|elsif|else if|else|foreach|for))/im;
     {print "\nNot Found";}
 $a = "line";
         $trans = "$a.rstrip()";
-        print $trans;
+        print "\t$trans\n";
+        print "\t"x2,$trans;
 
 # $this = "foreach \$i (0..9)";
 # $regex = qr/(?:for|foreach)\s+\$(\w+?)\s+\((.*)\)/;

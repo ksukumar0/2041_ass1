@@ -336,7 +336,7 @@ sub handle_stdin
         if( $2 eq "STDIN")
         {
             $import{"import sys\n"}=1;
-            $trans = "$1 = sys.stdin.read\(\)";
+            $trans = "$1 = sys.stdin.readline\(\)";
         }
     }
 return $trans;
@@ -408,7 +408,7 @@ sub handle_chomp
     my ($trans) = @_;
     my $transformed = 1;
 
-    if ( $trans =~ /chomp\s*\(\s*(\w+)\s*\)/ )
+    if ( $trans =~ /chomp\s*[(]?\s*\$(\w+)\s*[)]?/ )
     {
         $import{"import sys\n"} = 1;
         $trans = "$1 = $1.rstrip()";
