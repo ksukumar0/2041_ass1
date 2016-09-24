@@ -221,10 +221,24 @@ sub handle_variable
             else
                 {$vartype{$i} = '%d';}  # Default Integer
         }
-        $trans =~ s/[\s;]*$//;
-        $trans = handle_stdin($trans);
-        push (@pyarray,$trans."\n");
+        $trans = handle_stdin($trans);  # If <STDIN> is found changes it to sys.readline()
         $transformed = 0;
+    }
+my @localvar;
+
+    if( $trans =~ /@\s*(\w+)/)
+    {
+        @localvar = $trans =~ /\s*@\s*(\w+)\s*/g;
+        # print @localvar;
+        $trans =~ s/(@\s*)(\w+)/$2/g;
+        $trans =~ s/\s*ARGV/sys\.argv\[1:\]/g;
+        $transformed = 0;
+    }
+
+    if ( $transformed == 0)
+    {
+        $trans =~ s/[\s;]*$//;          # Removes ; at the end
+        push (@pyarray,$trans."\n");
     }
 
 return $transformed;
