@@ -3,10 +3,10 @@
 
 $i = 0;
 
-# if ( $i == 0)
-# {
-
-# }
+if ( $i == 0)
+{
+	print "";
+}
 
 # print "C way\n";
 
@@ -31,7 +31,7 @@ for $i (4..9)
 
 # for ($k=4; $k < 10 ; $k++)
 # {
-# 	print "$i\n";
+# 	print "$k\n";
 # }
 
 print "Using a while loop in PERL\n";

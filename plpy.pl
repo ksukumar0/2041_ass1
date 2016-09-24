@@ -222,9 +222,11 @@ sub handle_variable
                 {$vartype{$i} = '%d';}  # Default Integer
         }
         $trans =~ s/[\s;]*$//;
+        $trans = handle_stdin($trans);
         push (@pyarray,$trans."\n");
         $transformed = 0;
     }
+
 return $transformed;
 }
 
@@ -307,6 +309,38 @@ sub handle_for
 return $string;
 }
 
+##### Function to handle input from stdin #####
+sub handle_stdin
+{
+    my ($trans) = @_;
+    # print $trans;
+
+##### if of the form while ( $line = <STDIN|FH> ) #####
+    if ($trans =~ /while\s*\(\s*(\w*?)\s*[=]?\s*<\s*(\w+)\s*>\s*\)/)
+    {
+        if ($2 eq "STDIN")
+        {
+            $import{"import sys\n"}=1;
+            # $trans = ()
+            # print $1," ",$2;
+            $trans = "for $1 in sys.stdin"
+        }
+        else
+        {
+            # Handle other files
+        }
+    }
+##### if of the form while ( $line = <STDIN|FH> ) #####
+    elsif ( $trans =~ /(\w+)\s*=\s*<\s*(\w+)\s*>/)
+    {
+        if( $2 eq "STDIN")
+        {
+            $import{"import sys\n"}=1;
+            $trans = "$1 = sys.stdin.read\(\)";
+        }
+    }
+return $trans;
+}
 ##### This function has derived a lot of information from the following two webpages #####
 ##### https://www.tutorialspoint.com/perl/perl_operators.htm #####
 ##### http://www.tutorialspoint.com/python/python_basic_operators.htm #####
@@ -328,7 +362,7 @@ sub handle_controlstatements
     {
         # if any control statements are found push onto the array
 
-        $trans =~ s/(\$)(.*?)/$2/g;     # replacing all $var with var
+        $trans =~ s/(\$)(.*?)/$2/g;         # replacing all $var with var
 
         ##### Handle Operators #####
         $trans = handle_operators($trans);
@@ -336,7 +370,11 @@ sub handle_controlstatements
         if ($trans =~ /elsif/)
         {$trans =~ s/elsif/elif/g;}
 
+        ##### Handle for loops #####
         $trans = handle_for($trans);
+
+        ##### Handle Operators #####
+        $trans = handle_stdin($trans);        
 
         push (@pyarray,$trans."\n");
         $transformed = 0;
@@ -347,7 +385,6 @@ sub handle_controlstatements
     if ( $trans =~ /last\s*;\s*}?\s*:*$/ )
     {
         $trans =~ s/last\s*;\s*:*}?\s*:*$/break/;
-        $transformed = 0;
         push (@pyarray,$trans."\n");
         $transformed = 0;
     }
@@ -357,7 +394,6 @@ sub handle_controlstatements
     if ( $trans =~ /next\s*;\s*}?\s*:*$/ )
     {
         $trans =~ s/next\s*;\s*:*}?\s*:*$/continue/;
-        $transformed = 0;
         push (@pyarray,$trans."\n");
         $transformed = 0;
     }
@@ -365,6 +401,22 @@ sub handle_controlstatements
 return $transformed;
 }
 
+##### handles CHOMP #####
+
+sub handle_chomp
+{
+    my ($trans) = @_;
+    my $transformed = 1;
+
+    if ( $trans =~ /chomp\s*\(\s*(\w+)\s*\)/ )
+    {
+        $import{"import sys\n"} = 1;
+        $trans = "$1 = $1.rstrip()";
+        push (@pyarray,$trans."\n");        
+        $transformed = 0;
+    }
+return $transformed;
+}
 
 ##### Main Code starts here... #####
 
@@ -374,22 +426,28 @@ while ($line = <>)
 {
     $lineno++;
     chomp $line;
-    if (!handle_shebang($line))         # Handle Shebang line and move to the next line
+    if (!handle_shebang($line))             # Handle Shebang line and move to the next line
     {next;}
 
     # print $lineno, " ";
 
-    if (!handle_comment($line))         # Handles Codes with Comments
+    if (!handle_comment($line))             # Handles Codes with Comments
     {next;}
 
-    if (!handle_print($line))           # Handles prints
+    if (!handle_print($line))               # Handles prints
     {next;}
 
     if (!handle_controlstatements($line))
-    {next;}                             # Handles control statements like while/for/foreach etc...
+    {next;}                                 # Handles control statements like while/for/foreach etc...
 
-    if (!handle_variable($line))        # Handles variable declarations
+    if (!handle_variable($line))            # Handles variable declarations
     {next;}
+
+    if (!handle_chomp($line))               # Handles chomps
+    {next;}
+
+    # if (!handle_arrayprocess($line))        # Handles variable declarations
+    # {next;}
 
     push (@pyarray , "#".$line."\n");   # else comment the code and print it out
 }
@@ -410,9 +468,7 @@ foreach $i (@pyarray)
 {
     if ($i =~ /$endbrace/)
     {     
-        # print "FOUND $bracescount\n";
-        $bracescount--;
-        # print "FOUND $bracescount\n";
+        # $bracescount--;
     }                                  # Avoid printing closing braces
     else
     {
@@ -436,11 +492,10 @@ foreach $i (@pyarray)
     
 ##### Logic to differentiate the ... #####
 
-    if ($i =~ /\n\t*while/ )               # Logic to print C style For loop in perl
+    if ($i =~ /\n\t*while/ )            # Logic to print C style For loop in perl
     {                                   # This involves changing the For(;;) into while loop
-        # $bracescount++;                 # Where the condition is printing before the closing braces
+        # $bracescount++;               # Where the condition is printing before the closing braces
         push(@Cstylebraccnt,$bracescount);
-        # print "FOUND $bracescount\n";
     }
 
     if($i =~ /$endbrace/)
@@ -449,7 +504,7 @@ foreach $i (@pyarray)
         {$pytabindent--;}               # Decrease Indent when endbrace is found
         if($#Cstylebraccnt == 0)
         {
-            print @Cstylebraccnt,"Is the NUMBER\n";
+            # print @Cstylebraccnt,"Is the NUMBER\n";
         }
         # elsif ($bracescount == $Cstylebraccnt[$#Cstylebraccnt])
         # {
