@@ -22,7 +22,9 @@ $ctrlstmtrgx = qr/(?:^\s*[#]*(while|if|elsif|else if|else|foreach|for))/i;
 # $match_perl_line_endings = qr/[;\s]*$/;
 
 my $pytabindent = 0;
-my @pyarray; # Global python array which needs to be printed at the end
+my @pyarray;    # Global python array which needs to be printed at the end
+my %import;     # Global Hash that has the imports necessary for python
+
 my %vartype;
 sub handle_shebang
 {
@@ -171,6 +173,7 @@ sub handle_variable
     my $var;
     my $transformed = 1;
 
+##### Transforming ++ to +=1 #####
     if ($trans =~ /\+\+/)
     {
         $trans =~ s/\+\+/\+=1/g;
@@ -178,9 +181,21 @@ sub handle_variable
         $trans =~ s/(\$)(.*?)/$2/g;     # replacing $var with var
 
         $trans =~ s/[\s;]*$//;
-            push (@pyarray,$trans."\n");
+        push (@pyarray,$trans."\n");
         $transformed = 0;
     }
+##### Transforming -- to -=1 #####
+    elsif ( $trans =~ /\+\+/)
+    {
+        $trans =~ s/\+\+/\-=1/g;
+        @var = $trans =~ /\$(\w+)/g;    # Extracting variable names
+        $trans =~ s/(\$)(.*?)/$2/g;     # replacing $var with var
+
+        $trans =~ s/[\s;]*$//;
+        push (@pyarray,$trans."\n");
+        $transformed = 0;      
+    }
+##### converting $variable to variable and assigning type to the variable using a hash $vartype #####
     elsif ($trans =~ /^\s*\$(.*)/)
     {
         @var = $trans =~ /\$(\w+)/g;    # Extracting variable names
@@ -189,11 +204,11 @@ sub handle_variable
         foreach $i (@var)               # this loop determines the variable type and places them in a hash
         {
             if ($trans =~ /$i.+\./)
-                {$vartype{$i} = '%f';}
+                {$vartype{$i} = '%f';}  # Float
             elsif ($trans =~ /$i.+\".*\"/)
-                {$vartype{$i} = '%s';}
+                {$vartype{$i} = '%s';}  # String
             else
-                {$vartype{$i} = '%d';}
+                {$vartype{$i} = '%d';}  # Default Integer
         }
         $trans =~ s/[\s;]*$//;
         push (@pyarray,$trans."\n");
@@ -205,6 +220,7 @@ return $transformed;
 
 sub handle_operators
 {
+##### Hash to handle different logical operators for python #####
     my %operators = (
         "\\|\\|" => "or",
         "&&" => "and",
@@ -255,8 +271,12 @@ sub handle_for
         {
             $arr = $1;
         }
-
     $string = "for $ind in $arr :";
+    }
+
+    if ( $string =~ /\s*(?:for|foreach)\s*\((.*?);(.*?);(.*?)\)/)
+    {
+        print $1," ", $2," ",$3;
     }
 return $string;
 }
@@ -349,7 +369,15 @@ while ($line = <>)
 }
 
 my $endbrace = qr/#*}\s*$/;
-##### Print the python code #####
+
+##### Insert the import statements ######
+
+my @firstline = shift (@pyarray);       # Del first line from pyarray
+push (@firstline,keys %import);              # Add the imports into the array FIRSTLINE on top of the shebang
+push (@firstline, @pyarray);            # add the remaining array on top of the FIRSTLINE with imports
+@pyarray = @firstline;                  # Copy FIRSTLINE into PYARRAY
+
+#### Print the python code #####
 foreach $i (@pyarray)
 {
     if ($i =~ /$endbrace/)

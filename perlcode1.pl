@@ -59,17 +59,14 @@ sub handle
 }
 
 $string = 'for my $i (0..9)';
-print "\n$string";
+print "\n$string\n";
 my $for_regex = qr/(?:for|foreach)(?:\s+(?:my)?\s+|\s+)\$(\w+?)\s+\((.*)\)/;
 
 if ($string =~ /$for_regex/)
-{print "\nMatched\n $1\t$2"}
+{print "\nMatched\n $1\t$2\n"}
 else
 {print "\nNot matched\n";}
 
-
-foreach $a (ab..ad)
-{print "$a  ";}
 # $this = "foreach \$i (0..9)";
 # $regex = qr/(?:for|foreach)\s+\$(\w+?)\s+\((.*)\)/;
 # $this =~ $regex;
@@ -79,4 +76,3 @@ foreach $a (ab..ad)
 # $regex = qr/(?:for|foreach)\s+\$(\w+?)\s+\(@(.*)\)/;
 # $this =~ $regex;
 # print $1," ",$2;
-
