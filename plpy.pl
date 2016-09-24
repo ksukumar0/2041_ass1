@@ -271,17 +271,23 @@ sub handle_for
     {
         my $ind = $1;
         my $arr = $2;
-        $string =~ s/foreach/for/;          # convert Foreach to for
+        $string =~ s/foreach/for/;                      # convert Foreach to for
 
         if ( $arr =~ /\s*(\d+)\s*..\s*(\d+)\s*/)
-        {
+        {                                               # Extract range 0..9
             my $temp = $2+1;
             $arr = "range($1,$temp)";
         }
-
+                                                        # Extract Array information er @ARGV
         if ( $arr =~ /@(\w+)/)
         {
             $arr = $1;
+            if( $arr eq "ARGV")
+            {
+                $import{"import sys\n"} = 1;
+                $arr = "sys.argv[1:]";
+                $vartype{$ind} = '%s';
+            }
         }
     $string = "for $ind in $arr :";
     }
