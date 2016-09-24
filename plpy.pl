@@ -18,15 +18,15 @@ $print_only_var_without_nl_regex = qr/^\s*print\s*([^"]*)[\s;]*$/i;
 $print_only_var_regex = qr/^\s*print\s*([^"]*)\s*,\s*".*\\n"[\s;]*$/i;
 $ctrlstmtrgx = qr/(?:^\s*[#]*(while|if|elsif|else if|else|foreach|for))/im;
 
-
 # $match_perl_line_endings = qr/[;\s]*$/;
 
 my $pytabindent = 0;    # The print tab index for python
 my @pyarray;            # Global python array which needs to be printed at the end
 my %import;             # Global Hash that has the imports necessary for python
-my @loopexpression;
-
+my @loopexpression;     # Global variable which remembers the expression for the next iteration 
+                        # of the loop when using a C style for loop
 my %vartype;
+
 sub handle_shebang
 {
     my ($trans) = @_;
@@ -38,6 +38,8 @@ sub handle_shebang
     }
     return 1;
 }
+
+##### If its a comment leave it as it is #####
 
 sub handle_comment
 {
@@ -169,26 +171,21 @@ sub handle_pp_mm
 {
     my ($trans) = @_;
     my $transformed = 1;
-    my @var;
 
     ##### Transforming ++ to +=1 #####
     if ($trans =~ /\+\+/)
     {
         $trans =~ s/\+\+/\+=1/g;
-        @var = $trans =~ /\$(\w+)/g;    # Extracting variable names
         $trans =~ s/(\$)(.*?)/$2/g;     # replacing $var with var
-
-        $trans =~ s/[\s;]*$//;
+        $trans =~ s/[\s;]*$//;          # remove ; from the end
         $transformed = 0;
     }
 ##### Transforming -- to -=1 #####
     if ( $trans =~ /\-\-/)
     {
         $trans =~ s/\-\-/\-=1/g;
-        @var = $trans =~ /\$(\w+)/g;    # Extracting variable names
         $trans =~ s/(\$)(.*?)/$2/g;     # replacing $var with var
-
-        $trans =~ s/[\s;]*$//;
+        $trans =~ s/[\s;]*$//;          # remove ; from the end
         $transformed = 0;      
     }
     return ($transformed, $trans);
@@ -204,8 +201,7 @@ sub handle_variable
 
 ##### Handle i++s and i--s in the expression
     ($transformed, $trans) = handle_pp_mm($trans);
-    if($transformed == 0)
-    {push (@pyarray,$trans);}
+
 ##### converting $variable to variable and assigning type to the variable using a hash $vartype #####
     if ($trans =~ /^\s*\$(.*)/)
     {
@@ -224,10 +220,11 @@ sub handle_variable
         $trans = handle_stdin($trans);  # If <STDIN> is found changes it to sys.readline()
         $transformed = 0;
     }
-my @localvar;
 
-    if( $trans =~ /@\s*(\w+)/)
-    {
+    my @localvar;
+
+    if( $trans =~ /@\s*(\w+)/)          # looks for @ARGV and changes to sys.argv[1:]
+    {                                   # Also gets rid of the sigil for arrays and dicts
         @localvar = $trans =~ /\s*@\s*(\w+)\s*/g;
         # print @localvar;
         $trans =~ s/(@\s*)(\w+)/$2/g;
@@ -516,7 +513,7 @@ foreach $i (@pyarray)
     if ($i =~ /\n\t*while/ )            # Logic to print C style For loop in perl
     {                                   # This involves changing the For(;;) into while loop
         # $bracescount++;               # Where the condition is printing before the closing braces
-        push(@Cstylebraccnt,$bracescount);
+        # push(@Cstylebraccnt,$bracescount);
     }
 
     if($i =~ /$endbrace/)

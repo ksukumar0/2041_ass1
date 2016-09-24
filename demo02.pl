@@ -1,2 +1,6 @@
 #!/usr/bin/perl -w
-# put your demo script here
+# Script to take an input from STDIN and print it out
+
+@arr = ( 1,2 ,3 ,4 ,5 );
+
+print @arr;
