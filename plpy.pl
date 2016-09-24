@@ -451,18 +451,17 @@ foreach $i (@pyarray)
         {
             print @Cstylebraccnt,"Is the NUMBER\n";
         }
-        elsif ($bracescount == $Cstylebraccnt[$#Cstylebraccnt])
-        {
-            if ( @loopexpression )
-            {
-                # print "\t"x($pytabindent+1), shift (@loopexpression);
-                # print @loopexpression;
-            }
-            pop(@Cstylebraccnt);
-        }
+        # elsif ($bracescount == $Cstylebraccnt[$#Cstylebraccnt])
+        # {
+        #     if ( @loopexpression )
+        #     {
+        #         # print "\t"x($pytabindent+1), shift (@loopexpression);
+        #         # print @loopexpression;
+        #     }
+        #     pop(@Cstylebraccnt);
+        # }
     }
 }
 
-                print "\n\n\nTHIS IS WHAT IT HAS", join (",",@loopexpression);
-
+# print "\n\n\nTHIS IS WHAT IT HAS", join (",",@loopexpression);
 # print "\nThe places where the C style while loops are used are", join (",",@Cstylebraccnt);
