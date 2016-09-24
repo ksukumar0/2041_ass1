@@ -455,6 +455,7 @@ while ($line = <>)
 my $endbrace = qr/#*}\s*$/;
 my $bracescount=0;
 my @Cstylebraccnt;
+my $indent = "\t";
 
 ##### Insert the import statements ######
 
@@ -473,7 +474,7 @@ foreach $i (@pyarray)
     else
     {
         $i =~ s/^\t*\ *//;
-        my $tabspacing = "\t"x$pytabindent;
+        my $tabspacing = "$indent"x$pytabindent;
         $i =~ s/^/$tabspacing/mg;
         print $i;
     }                                  # Else print other statements 
