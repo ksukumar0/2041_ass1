@@ -469,7 +469,7 @@ while ($line = <>)
     push (@pyarray , "#".$line."\n");   # else comment the code and print it out
 }
 
-my $endbrace = qr/#*}\s*$/;
+my $endbrace = qr/#*\s*}\s*$/;
 my $bracescount=0;
 my @Cstylebraccnt;
 my $indent = "\t";
@@ -484,16 +484,17 @@ push (@firstline, @pyarray);            # add the remaining array on top of the 
 #### Print the python code #####
 foreach $i (@pyarray)
 {
+    print "BRACE CNT: $bracescount";
+    print $i;
     if ($i =~ /$endbrace/)
     {     
-        # $bracescount--;
     }                                  # Avoid printing closing braces
     else
     {
         $i =~ s/^\t*\ *//;
         my $tabspacing = "$indent"x$pytabindent;
         $i =~ s/^/$tabspacing/mg;
-        print $i;
+        # print $i;
     }                                  # Else print other statements 
 
 #### count open braces #####
@@ -513,28 +514,36 @@ foreach $i (@pyarray)
     if ($i =~ /\n\t*while/ )            # Logic to print C style For loop in perl
     {                                   # This involves changing the For(;;) into while loop
         # $bracescount++;               # Where the condition is printing before the closing braces
-        # push(@Cstylebraccnt,$bracescount);
+        push(@Cstylebraccnt,$bracescount+1);
+        print "PUSHED ONTO STACK @Cstylebraccnt";
     }
 
     if($i =~ /$endbrace/)
     {
         if($pytabindent>0)
         {$pytabindent--;}               # Decrease Indent when endbrace is found
-        if($#Cstylebraccnt == 0)
+        
+        if (@Cstylebraccnt)
         {
-            # print @Cstylebraccnt,"Is the NUMBER\n";
+            if ($bracescount == $Cstylebraccnt[$#Cstylebraccnt]-1)
+            {print "GOT YA";}
+                # if ( @loopexpression )
+                # {
+                    # print "\t"x($pytabindent+1), pop (@loopexpression);
+                    # print @loopexpression;
+                # }
+                if ( $bracescount == ($Cstylebraccnt[$#Cstylebraccnt]-1) )
+                {
+                    print "BRACE END: $Cstylebraccnt[$#Cstylebraccnt]";
+                    print pop(@Cstylebraccnt);
+                    print "HERE NOW\n";
+                }
+            # }
         }
-        # elsif ($bracescount == $Cstylebraccnt[$#Cstylebraccnt])
-        # {
-        #     if ( @loopexpression )
-        #     {
-        #         # print "\t"x($pytabindent+1), shift (@loopexpression);
-        #         # print @loopexpression;
-        #     }
-        #     pop(@Cstylebraccnt);
-        # }
+    $bracescount--;
     }
 }
 
 # print "\n\n\nTHIS IS WHAT IT HAS", join (",",@loopexpression);
-# print "\nThe places where the C style while loops are used are", join (",",@Cstylebraccnt);
+print "\nThe places where the C style while loops are used are", join (",",@Cstylebraccnt);
+

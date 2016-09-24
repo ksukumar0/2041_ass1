@@ -86,12 +86,36 @@ $a = "line";
         print "\t$trans\n";
         print "\t"x2,$trans;
 
-# $this = "foreach \$i (0..9)";
-# $regex = qr/(?:for|foreach)\s+\$(\w+?)\s+\((.*)\)/;
-# $this =~ $regex;
-# print $1," ",$2,"\n";
+@Cstylebraccnt = (1,2,3);
+$bracescount = 1;
 
-# $this = "foreach \$i (\@random)";
-# $regex = qr/(?:for|foreach)\s+\$(\w+?)\s+\(@(.*)\)/;
-# $this =~ $regex;
-# print $1," ",$2;
+# $bracescount = 5;
+# push(@Cstylebraccnt,$bracescount+1);
+pop (@Cstylebraccnt);
+print "Number: $#Cstylebraccnt";
+
+        if ( @Cstylebraccnt)
+        {
+            # if ($bracescount == $Cstylebraccnt[$#Cstylebraccnt]-1)
+            # {
+                # if ( @loopexpression )
+                # {
+                    # print "\t"x($pytabindent+1), pop (@loopexpression);
+                    # print @loopexpression;
+                # }
+                if ( $bracescount == ($Cstylebraccnt[$#Cstylebraccnt]-1) )
+                {
+                    print "BRACE END: $Cstylebraccnt[$#Cstylebraccnt]";
+                    print pop(@Cstylebraccnt);
+                    print "HERE NOW";
+                }
+            # }
+        }
+
+print "Number: $#Cstylebraccnt";
+
+if (@Cstylebraccnt)
+{print "Does Exist";}
+else
+{print "IT Doesent!";}
+print "\n",join(',',@Cstylebraccnt);

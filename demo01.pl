@@ -8,17 +8,24 @@ if ( $i == 0)
 	print "";
 }
 
-# print "C way\n";
+print "C way\n";
 
-# for ($i=4; $i < 10 ; $i++)
-# {
-# 	print "$i\n";
-# 	for ($j=10; $j < 12 ; $j++)
-# 	{
-# 		print "$j\n";
-# 	}
-
-# }
+for ($i=4; $i < 10 ; $i++)
+{
+	print "$i\n";
+	for ($j=10; $j < 12 ; $j++)
+	{
+		print "$j\n";
+		if ( $j == 15 )
+		{
+			print "";
+		}
+		else
+		{
+			print "";
+		}
+	}
+}
 
 print "Perl way\n";
 
@@ -27,17 +34,13 @@ for $i (4..9)
 	print "$i\n";
 }
 
-# print "C way\n";
+print "C way the 2nd TIME\n";
 
-# for ($k=4; $k < 10 ; $k++)
-# {
-# 	print "$k\n";
-# }
-
-print "Using a while loop in PERL\n";
-$i = 0;
-while ($i < 10)
+for ($i=4; $i < 10 ; $i++)
 {
-	print $i,"\n";
-	$i++;
+	print "$i\n";
+	for ($j=10; $j < 12 ; $j++)
+	{
+		print "$j\n";
+	}
 }
