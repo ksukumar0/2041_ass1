@@ -1,6 +1,9 @@
 # Karthik Sukumar
 # Limitations of plpy.pl
 
+General
+* curly braces at the beginning followed by code gets flagged as a comment (this needs work)
+
 Print statements
 *	complex print statements like
 print "$var12 is not even", "\t", $var13, "this number is odd"; 

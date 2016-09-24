@@ -67,6 +67,21 @@ if ($string =~ /$for_regex/)
 else
 {print "\nNot matched\n";}
 
+$Cstyleforloop = "i =0
+while i<10 :
+	i+=1";
+
+print $Cstyleforloop;
+$ctrlstmtrgx = qr/(?:^\s*[#]*(while|if|elsif|else if|else|foreach|for))/im;
+
+    if ($Cstyleforloop =~ /$ctrlstmtrgx/ )
+    {
+	        # $pytabindent++;
+        print "\nFound\n";
+    }
+    else
+    {print "\nNot Found";}
+
 # $this = "foreach \$i (0..9)";
 # $regex = qr/(?:for|foreach)\s+\$(\w+?)\s+\((.*)\)/;
 # $this =~ $regex;

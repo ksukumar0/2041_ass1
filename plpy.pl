@@ -16,14 +16,15 @@ $print_without_nl_regex = qr/^\s*print\s*"(.*)"[\s;]*$/i;
 
 $print_only_var_without_nl_regex = qr/^\s*print\s*([^"]*)[\s;]*$/i;
 $print_only_var_regex = qr/^\s*print\s*([^"]*)\s*,\s*".*\\n"[\s;]*$/i;
-$ctrlstmtrgx = qr/(?:^\s*[#]*(while|if|elsif|else if|else|foreach|for))/i;
+$ctrlstmtrgx = qr/(?:^\s*[#]*(while|if|elsif|else if|else|foreach|for))/im;
 
 
 # $match_perl_line_endings = qr/[;\s]*$/;
 
-my $pytabindent = 0;
-my @pyarray;    # Global python array which needs to be printed at the end
-my %import;     # Global Hash that has the imports necessary for python
+my $pytabindent = 0;    # The print tab index for python
+my @pyarray;            # Global python array which needs to be printed at the end
+my %import;             # Global Hash that has the imports necessary for python
+my @loopexpression;
 
 my %vartype;
 sub handle_shebang
@@ -31,7 +32,7 @@ sub handle_shebang
     my ($trans) = @_;
     if ($line =~ /^#!/ && $. == 1) 
     {
-        # translate #! line  
+        # translate #! Shebang line  
         push (@pyarray, "#!/usr/local/bin/python3.5 -u\n");
         return 0;
     }
@@ -58,7 +59,7 @@ sub handle_print
     my $r;
     my $loc;
 
-#print simple variables if the line only has variables without newline
+##### print simple variables if the line only has variables without newline #####
     if ($trans =~ /$print_only_var_without_nl_regex/)
     {
         # print "TRY 1";
@@ -73,7 +74,7 @@ sub handle_print
 
         return 0;
     }
-#print simple variables if the line only has variables without newline
+##### print simple variables if the line only has variables without newline #####
     elsif ($trans =~ /$print_only_var_regex/)
     {
         # print "TRY 2";
@@ -85,8 +86,7 @@ sub handle_print
         push (@pyarray,$temp);
         return 0;
     }
-
-#print plain strings below which have a newline in them
+##### print plain strings below which have a newline in them #####
     if ($trans =~ /$print_regex/)
     {
         # print "TRY 3";
@@ -165,6 +165,35 @@ sub handle_print
 return 1;
 }
 
+sub handle_pp_mm
+{
+    my ($trans) = @_;
+    my $transformed = 1;
+    my @var;
+
+    ##### Transforming ++ to +=1 #####
+    if ($trans =~ /\+\+/)
+    {
+        $trans =~ s/\+\+/\+=1/g;
+        @var = $trans =~ /\$(\w+)/g;    # Extracting variable names
+        $trans =~ s/(\$)(.*?)/$2/g;     # replacing $var with var
+
+        $trans =~ s/[\s;]*$//;
+        $transformed = 0;
+    }
+##### Transforming -- to -=1 #####
+    if ( $trans =~ /\-\-/)
+    {
+        $trans =~ s/\-\-/\-=1/g;
+        @var = $trans =~ /\$(\w+)/g;    # Extracting variable names
+        $trans =~ s/(\$)(.*?)/$2/g;     # replacing $var with var
+
+        $trans =~ s/[\s;]*$//;
+        $transformed = 0;      
+    }
+    return ($transformed, $trans);
+}
+
 sub handle_variable
 {
 
@@ -173,30 +202,12 @@ sub handle_variable
     my $var;
     my $transformed = 1;
 
-##### Transforming ++ to +=1 #####
-    if ($trans =~ /\+\+/)
-    {
-        $trans =~ s/\+\+/\+=1/g;
-        @var = $trans =~ /\$(\w+)/g;    # Extracting variable names
-        $trans =~ s/(\$)(.*?)/$2/g;     # replacing $var with var
-
-        $trans =~ s/[\s;]*$//;
-        push (@pyarray,$trans."\n");
-        $transformed = 0;
-    }
-##### Transforming -- to -=1 #####
-    elsif ( $trans =~ /\+\+/)
-    {
-        $trans =~ s/\+\+/\-=1/g;
-        @var = $trans =~ /\$(\w+)/g;    # Extracting variable names
-        $trans =~ s/(\$)(.*?)/$2/g;     # replacing $var with var
-
-        $trans =~ s/[\s;]*$//;
-        push (@pyarray,$trans."\n");
-        $transformed = 0;      
-    }
+##### Handle i++s and i--s in the expression
+    ($transformed, $trans) = handle_pp_mm($trans);
+    if($transformed == 0)
+    {push (@pyarray,$trans);}
 ##### converting $variable to variable and assigning type to the variable using a hash $vartype #####
-    elsif ($trans =~ /^\s*\$(.*)/)
+    if ($trans =~ /^\s*\$(.*)/)
     {
         @var = $trans =~ /\$(\w+)/g;    # Extracting variable names
         $trans =~ s/(\$)(.*?)/$2/g;     # replacing $var with var
@@ -214,7 +225,6 @@ sub handle_variable
         push (@pyarray,$trans."\n");
         $transformed = 0;
     }
-
 return $transformed;
 }
 
@@ -276,7 +286,23 @@ sub handle_for
 
     if ( $string =~ /\s*(?:for|foreach)\s*\((.*?);(.*?);(.*?)\)/)
     {
-        print $1," ", $2," ",$3;
+        my $var;
+        ##### Handle i++s and i--s in the expression
+
+##### The following section of code had insights from this forum contribution #####
+##### http://www.perlmonks.org/?node_id=723825 #####
+        my $init;
+        my $condition;
+        my $exp;
+        ($var, $string) = handle_pp_mm($string);
+
+        ($init,$condition,$exp) = $string =~ /\s*(?:for|foreach)\s*\(\s*(.*?)\s*;\s*(.*?)\s*;\s*(.*?)\s*\)/ ;
+        
+        $condition = 'while'." $condition :";
+        $string = $init."\n".$condition."\n"."\t"; #.$exp."\n";
+        push (@loopexpression, $exp);                   # push expressions onto an array and print before the closing braces;
+        # print $init, " ",$condition, " ", $exp;
+        print $string;
     }
 return $string;
 }
@@ -381,7 +407,13 @@ push (@firstline, @pyarray);            # add the remaining array on top of the 
 foreach $i (@pyarray)
 {
     if ($i =~ /$endbrace/)
-    {}                       # Avoid printing closing braces
+    {
+       # if ( @loopexpression )
+       #  {
+       #      print "\t"x$pytabindent, shift (@loopexpression);
+       #      print @loopexpression;
+       #  }        
+    }                                  # Avoid printing closing braces
     else
     {
         $i =~ s/^\t*\ *//;
@@ -392,11 +424,14 @@ foreach $i (@pyarray)
 ##### If there is a control statement increment the tab indent for the next line by 1 #####
 
     if ($i =~ /$ctrlstmtrgx/ )
-    {$pytabindent++;}                   # Logic for indenting tabs
+    {
+        $pytabindent++;
+    }                                   # Logic for indenting tabs
     
     if($i =~ /$endbrace/)
     {
         if($pytabindent>0)
         {$pytabindent--;}               # Decrease Indent when endbrace is found
+
     }
 }
