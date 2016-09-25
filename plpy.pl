@@ -520,8 +520,6 @@ foreach $i (@pyarray)
         if($pytabindent>0)
         {$pytabindent--;}               # Decrease Indent when endbrace is found
         
-        # print "HAHA CNT : $bracescount ",$Cstylebraccnt[$#Cstylebraccnt]-1;
-
         if (@Cstylebraccnt)
         {
             if ( $bracescount == ($Cstylebraccnt[$#Cstylebraccnt]) )
