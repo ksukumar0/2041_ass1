@@ -515,9 +515,11 @@ foreach $i (@pyarray)
     # print $i;
     if ($i =~ /$endbrace/)
     {     
+        print "BRACE CNT: $bracescount\n";
     }                                  # Avoid printing closing braces
     else
     {
+        print "BRACE CNT: $bracescount";
         $i =~ s/^\t*\ *//;
         my $tabspacing = "$indent"x($pytabindent);
         $i =~ s/^/$tabspacing/mg;
