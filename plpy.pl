@@ -222,19 +222,33 @@ sub handle_variable
     my $t2 = 1;
     my $t3 = 1;
     my $t4 = 1;
+    my $t5 = 1;
+    my $t6 = 1;
 
 ##### Handle i++s and i--s in the expression #####
     ($t1, $trans) = handle_pp_mm($trans);
 ##### 
     # ($t2, $trans) = handle_join($trans);
+    if ( $trans =~ /STDIN/)
+    {
+        $trans = handle_stdin($trans);  # If <STDIN> is found changes it to sys.readline()
+        $t5 = 0;
+    }
 
 ##### Converting $#ARGV to len(sys.argv) #####
 
-    if ($trans =~ /\$\#ARGV/)
+    if ($trans =~ /\$\#(\w+)/)
     {
-        $trans =~ s/\$\#ARGV/len\(sys.argv\)/g;
+        my $tempvar = $2;
+        if ( $tempvar eq ARGV)
+        {$trans =~ s/\$\#ARGV/len\(sys.argv\)/g;}
+        else
+        {
+            $trans =~ s/(\$\#)(\w+)/len\($2\)/;     # Replaces #$array with len(array)
+        }
+
         $import{"import sys\n"} = 1;
-        $transformed = 0;
+        $t6 = 0;
     }
 
 ##### converting $variable to variable and assigning type to the variable using a hash $vartype #####
@@ -253,7 +267,6 @@ sub handle_variable
             else
                 {$vartype{$i} = '%d';}  # Default Integer
         }
-        $trans = handle_stdin($trans);  # If <STDIN> is found changes it to sys.readline()
         $t3 = 0;
     }
 
@@ -268,7 +281,7 @@ sub handle_variable
         $t4 = 0;
     }
 
-    $transformed = $t1 & $t2 & $t3 & $t4;
+    $transformed = $t1 & $t2 & $t3 & $t4 & $t5 & $t6;
 
     if ( $transformed == 0 )
     {
@@ -384,7 +397,7 @@ sub handle_stdin
         }
     }
 ##### if of the form while ( $line = <STDIN|FH> ) #####
-    elsif ( $trans =~ /(\w+)\s*=\s*<\s*(\w+)\s*>/)
+    elsif ( $trans =~ /(\w+)\s*=\s*<\s*(\w+)\s*>/ )
     {
         if( $2 eq "STDIN")
         {

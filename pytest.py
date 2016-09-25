@@ -24,3 +24,15 @@ a.append(1)
 b = sys.argv[1:]
 
 print(a,b)
+
+import sys
+print("Enter a number: ",end="")
+a = sys.stdin.readline()
+if (a < 0):
+	print("negative") 
+elif (a == 0):
+	print("zero") 
+elif (a < 10):
+	print("small") 
+else:
+	print("large")
