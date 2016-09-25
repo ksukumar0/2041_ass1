@@ -119,3 +119,53 @@ if (@Cstylebraccnt)
 else
 {print "IT Doesent!";}
 print "\n",join(',',@Cstylebraccnt);
+
+# my $joinstr = "join ('|' , (1,2,3,4))";
+# # my $joinstr = "\@hit = join ('|' , (\@arrrgx) ) ";
+
+# # print $joinstr,"\n";
+# my $joinrgx = qr/(join\s*\(\s*(.*?)\s*,\s*(?:(?:\(?\s*@?(\w+)\s*\)?)|\((.*?)\))\s*\))/;
+#     if( $joinstr =~ /$joinrgx/g )
+#     {
+# 		# print "Whole: $1","\n","The next $2 $3 $4";
+# 		$a=$1;
+# 		$b=$2;
+# 		$c=$3;
+# 		$d=$4;
+# 	    if (defined $3)
+# 	    {
+# 	    	print "\n\$3 is empty";
+# 	    }
+# 	    if (defined $4)
+# 	    {
+# 	    	print "\n\$4 is empty\n";
+# 			print "\$a is $a","\n","\$b is $2 \$d is $4";
+# 			$joinstr =~ s/$a/$b$d/g;
+# 			print "\n",$joinstr;
+# 	    }
+# 	}
+
+
+my $joinstr = " karthik has the hots for Erika :)";
+# my $joinstr = "\@hit = join ('|' , (\@arrrgx) ) ";
+
+# print $joinstr,"\n";
+my $joinrgx = qr/(karthik)(.*)(hots for )(.*)( :)/;
+    if( $joinstr =~ /(karthik(.*)(hots for ){1}(.*) :)/g )
+    {
+		# print "Whole: $1","\n","The next $2 $3 $4";
+		# $a=$1;
+		# $b=$2;
+		# $c=$3;
+	    # if (defined $3)
+	    # {
+	    # 	print "\n\$3 is empty";
+	    # }
+	    # if (defined $3)
+	    # {
+	  #   	print "\n\$4 is empty\n";
+			# print "\$a is $a","\n","\$b is $2 \$c is $3";
+			$joinstr =~ s/$1/$2\.$4/g;
+			print "\n",$joinstr;
+	    # }
+	}

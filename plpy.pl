@@ -191,17 +191,42 @@ sub handle_pp_mm
     return ($transformed, $trans);
 }
 
+sub handle_join
+{
+    my ($trans) = @_;
+    my $transformed = 1;
+    my $joinrgx = qr/(join\s*\(\s*(.*?)\s*,\s*(?:(?:\(?\s*@?(\w+)\s*\)?)|\((.*?)\))\s*\))/;
+    
+##### Transforming $str = join('blah',@arr) -> str = arr.join('blah') #####
+    if( $trans =~ /$joinrgx/ )
+    {
+        if ( $3 eq "")
+        {
+        }
+        elsif ($4 eq "")
+        {
+            $trans =~ s/$1/$3\.join($4)/g;
+        }
+    }
+
+return ($transformed, $trans;
+}
+
 sub handle_variable
 {
 
 ##### Transforms $variable to variable #####
     my ($trans) = @_;
     my $var;
-    my $transformed = 1;
+    my $t1 = 1;
+    my $t2 = 1;
+    my $t3 = 1;
+    my $t4 = 1;
 
-##### Handle i++s and i--s in the expression
-    ($transformed, $trans) = handle_pp_mm($trans);
-    ($transformed, $trans) = handle_join($trans);
+##### Handle i++s and i--s in the expression #####
+    ($t1, $trans) = handle_pp_mm($trans);
+##### 
+    ($t2, $trans) = handle_join($trans);
 
 ##### converting $variable to variable and assigning type to the variable using a hash $vartype #####
     if ($trans =~ /^\s*\$(.*)/)
@@ -219,7 +244,7 @@ sub handle_variable
                 {$vartype{$i} = '%d';}  # Default Integer
         }
         $trans = handle_stdin($trans);  # If <STDIN> is found changes it to sys.readline()
-        $transformed = 0;
+        $t3 = 0;
     }
 
     my @localvar;
@@ -230,10 +255,12 @@ sub handle_variable
         # print @localvar;
         $trans =~ s/(@\s*)(\w+)/$2/g;
         $trans =~ s/\s*ARGV/sys\.argv\[1:\]/g;
-        $transformed = 0;
+        $t4 = 0;
     }
 
-    if ( $transformed == 0)
+$transformed = $t1 & $t2 & $t3 & $t4;
+
+    if ( $transformed == 0 )
     {
         $trans =~ s/[\s;]*$//;          # Removes ; at the end
         push (@pyarray,$trans."\n");
