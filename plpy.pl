@@ -16,7 +16,7 @@ $print_without_nl_regex = qr/^\s*print\s*"(.*)"[\s;]*$/i;
 
 $print_only_var_without_nl_regex = qr/^\s*print\s*([^"]*)[\s;]*$/i;
 $print_only_var_regex = qr/^\s*print\s*([^"]*)\s*,\s*".*\\n"[\s;]*$/i;
-$ctrlstmtrgx = qr/(?:^\s*[#]*(while|if|elsif|else if|else|foreach|for))/im;
+$ctrlstmtrgx = qr/(?:^\s*[#}]*\s*(while|if|elsif|else if|else|elif|foreach|for))/im;
 
 # $match_perl_line_endings = qr/[;\s]*$/;
 
@@ -228,7 +228,17 @@ sub handle_variable
 ##### 
     # ($t2, $trans) = handle_join($trans);
 
+##### Converting $#ARGV to len(sys.argv) #####
+
+    if ($trans =~ /\$\#ARGV/)
+    {
+        $trans =~ s/\$\#ARGV/len\(sys.argv\)/g;
+        $import{"import sys\n"} = 1;
+        $transformed = 0;
+    }
+
 ##### converting $variable to variable and assigning type to the variable using a hash $vartype #####
+
     if ($trans =~ /^\s*\$(.*)/)
     {
         @var = $trans =~ /\$(\w+)/g;    # Extracting variable names
@@ -258,7 +268,7 @@ sub handle_variable
         $t4 = 0;
     }
 
-$transformed = $t1 & $t2 & $t3 & $t4;
+    $transformed = $t1 & $t2 & $t3 & $t4;
 
     if ( $transformed == 0 )
     {
@@ -348,8 +358,6 @@ sub handle_for
         $condition = 'while'." $condition :";
         $string = $init."\n".$condition."\n"."\t"; #.$exp."\n";
         push (@loopexpression, $exp);                   # push expressions onto an array and print before the closing braces;
-        # print $init, " ",$condition, " ", $exp;
-        # print $string;
     }
 return $string;
 }
@@ -405,6 +413,12 @@ sub handle_controlstatements
     
     if ( $trans =~ /$ctrlstmtrgx/ )
     {
+        if ( $trans =~ /^\s*}/)
+        {
+            $trans =~ s/^\s*}\s*//;
+            push (@pyarray,"}\n");
+        }
+
         # if any control statements are found push onto the array
 
         $trans =~ s/(\$)(.*?)/$2/g;         # replacing all $var with var
@@ -421,7 +435,6 @@ sub handle_controlstatements
         ##### Handle Operators #####
         $trans = handle_stdin($trans);        
 
-        push (@pyarray,$trans."\n");
         $transformed = 0;
     }
 
@@ -430,7 +443,6 @@ sub handle_controlstatements
     if ( $trans =~ /last\s*;\s*}?\s*:*$/ )
     {
         $trans =~ s/last\s*;\s*:*}?\s*:*$/break/;
-        push (@pyarray,$trans."\n");
         $transformed = 0;
     }
 
@@ -439,9 +451,11 @@ sub handle_controlstatements
     if ( $trans =~ /next\s*;\s*}?\s*:*$/ )
     {
         $trans =~ s/next\s*;\s*:*}?\s*:*$/continue/;
-        push (@pyarray,$trans."\n");
         $transformed = 0;
     }
+
+if ($transformed == 0)
+{push (@pyarray,$trans."\n");}
 
 return $transformed;
 }
@@ -512,12 +526,7 @@ push (@firstline, @pyarray);            # add the remaining array on top of the 
 #### Print the python code #####
 foreach $i (@pyarray)
 {
-    # print $i;
-    # if ($i =~ /$endbrace/)
-    # {     
-    #     print "BRACE CNT: $bracescount\n";
-    # }                                  # Avoid printing closing braces
-
+# print $i;
     if($i =~ /$endbrace/)
     {
         if($pytabindent>0)
@@ -536,7 +545,6 @@ foreach $i (@pyarray)
         # Else print other statements
     else
     {
-        # print "BRACE CNT: $bracescount";
         $i =~ s/^\t*\ *//;
         my $tabspacing = "$indent"x($pytabindent);
         $i =~ s/^/$tabspacing/mg;
@@ -547,12 +555,6 @@ foreach $i (@pyarray)
         {print $i;}
     }
 
-# #### count open braces #####
-#     if ($i =~ /^.*[{:]\s*$/)
-#     {
-#         $bracescount++;
-#     }
-    
 ##### Logic to differentiate the C Style for loops #####
 
     if ($i =~ /\n\t*while/ )            # Logic to print C style For loop in perl
