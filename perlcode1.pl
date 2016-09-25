@@ -151,7 +151,7 @@ my $joinstr = " karthik has the hots for Erika :)";
 
 # print $joinstr,"\n";
 my $joinrgx = qr/(karthik)(.*)(hots for )(.*)( :)/;
-    if( $joinstr =~ /(karthik(.*)(hots for ){1}(.*) :)/g )
+    if( $joinstr =~ $joinrgx) #/(karthik(.*)(hots for ){1}(.*) :)/g )
     {
 		# print "Whole: $1","\n","The next $2 $3 $4";
 		# $a=$1;

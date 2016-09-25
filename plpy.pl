@@ -209,7 +209,7 @@ sub handle_join
         }
     }
 
-return ($transformed, $trans;
+return ($transformed, $trans);
 }
 
 sub handle_variable
@@ -226,7 +226,7 @@ sub handle_variable
 ##### Handle i++s and i--s in the expression #####
     ($t1, $trans) = handle_pp_mm($trans);
 ##### 
-    ($t2, $trans) = handle_join($trans);
+    # ($t2, $trans) = handle_join($trans);
 
 ##### converting $variable to variable and assigning type to the variable using a hash $vartype #####
     if ($trans =~ /^\s*\$(.*)/)
@@ -368,7 +368,7 @@ sub handle_stdin
             $import{"import sys\n"}=1;
             # $trans = ()
             # print $1," ",$2;
-            $trans = "for $1 in sys.stdin"
+            $trans = "for $1 in sys.stdin:"
         }
         else
         {
