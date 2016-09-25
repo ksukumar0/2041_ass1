@@ -513,37 +513,10 @@ push (@firstline, @pyarray);            # add the remaining array on top of the 
 foreach $i (@pyarray)
 {
     # print $i;
-    if ($i =~ /$endbrace/)
-    {     
-        print "BRACE CNT: $bracescount\n";
-    }                                  # Avoid printing closing braces
-    else
-    {
-        print "BRACE CNT: $bracescount";
-        $i =~ s/^\t*\ *//;
-        my $tabspacing = "$indent"x($pytabindent);
-        $i =~ s/^/$tabspacing/mg;
-        print $i;
-    }                                  # Else print other statements
-
-#### count open braces #####
-    if ($i =~ /^.*{\s*$/)
-    {
-        $bracescount++;
-    }
-##### If there is a control statement increment the tab indent for the next line by 1 #####
-
-    if ($i =~ /$ctrlstmtrgx/ )
-    {
-        $pytabindent++;
-    }
-    
-##### Logic to differentiate the C Style for loops #####
-
-    if ($i =~ /\n\t*while/ )            # Logic to print C style For loop in perl
-    {                                   # This involves changing the For(;;) into while loop
-        push(@Cstylebraccnt,$bracescount+1);
-    }
+    # if ($i =~ /$endbrace/)
+    # {     
+    #     print "BRACE CNT: $bracescount\n";
+    # }                                  # Avoid printing closing braces
 
     if($i =~ /$endbrace/)
     {
@@ -558,7 +531,44 @@ foreach $i (@pyarray)
                 pop(@Cstylebraccnt);
             }
         }
-    $bracescount--;
+        $bracescount--;
     }
+        # Else print other statements
+    else
+    {
+        # print "BRACE CNT: $bracescount";
+        $i =~ s/^\t*\ *//;
+        my $tabspacing = "$indent"x($pytabindent);
+        $i =~ s/^/$tabspacing/mg;
+
+        if ($i =~ /^.*[{]\s*$/)
+        {}                          # Dont print {
+        else
+        {print $i;}
+    }
+
+# #### count open braces #####
+#     if ($i =~ /^.*[{:]\s*$/)
+#     {
+#         $bracescount++;
+#     }
+    
+##### Logic to differentiate the C Style for loops #####
+
+    if ($i =~ /\n\t*while/ )            # Logic to print C style For loop in perl
+    {                                   # This involves changing the For(;;) into while loop
+        $bracescount++;
+        $pytabindent++;
+        push(@Cstylebraccnt,$bracescount);
+    }
+
+##### If there is a control statement increment the tab indent for the next line by 1 #####
+
+    elsif ($i =~ /$ctrlstmtrgx/ )
+    {
+        $bracescount++;
+        $pytabindent++;
+    }
+    # print "BRACE CNT: $bracescount";
 }
 
