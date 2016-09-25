@@ -201,6 +201,7 @@ sub handle_variable
 
 ##### Handle i++s and i--s in the expression
     ($transformed, $trans) = handle_pp_mm($trans);
+    ($transformed, $trans) = handle_join($trans);
 
 ##### converting $variable to variable and assigning type to the variable using a hash $vartype #####
     if ($trans =~ /^\s*\$(.*)/)
@@ -458,7 +459,7 @@ while ($line = <>)
     {next;}                                 # Handles control statements like while/for/foreach etc...
 
     if (!handle_variable($line))            # Handles variable declarations
-    {next;}
+    {next;}    
 
     if (!handle_chomp($line))               # Handles chomps
     {next;}
@@ -508,7 +509,7 @@ foreach $i (@pyarray)
         $pytabindent++;
     }
     
-##### Logic to differentiate the ... #####
+##### Logic to differentiate the C Style for loops #####
 
     if ($i =~ /\n\t*while/ )            # Logic to print C style For loop in perl
     {                                   # This involves changing the For(;;) into while loop
