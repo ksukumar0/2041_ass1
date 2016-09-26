@@ -1,37 +1,34 @@
 #!/usr/bin/perl -w
 
-my $joinstr = 'david has the hots for Erika :)';
-# my $joinstr = "\@hit = join ('|' , (\@arrrgx) ) ";
+# my $joinstr = 'david has the hots for Erika :)';
+my $joinstr = "\@hit = join ('|' , (1,2,3) ) ";
 
-my $joinrgx = qr/(david .* hots for (.*) :\))/;
+my $joinrgx = qr/join\s*\(\s*(.*?)\s*,\s*(?:(?:\(?\s*@?(\w+)\s*\)?)|\((.*?)\))\s*\)/;
 
-# $rgx2 = $joinrgx;
-$joinrgx = quotemeta $joinrgx;
+	# ($a,$b,$c) = ($joinstr =~ /$joinrgx/);
+	# if (defined $c)
+	# {
+		# print "\nB is not defined";
+		# print $a ," ",$c;
+		if ($joinstr =~ /$joinrgx/)
+		{
+			if (defined $3)
+			{$joinstr =~ s/$joinrgx/\($1\)\.join\($3\)/g;}
+			else
+			{$joinstr =~ s/$joinrgx/\($1\)\.join\($2\)/g;}
+		}
+	# }
+	# elsif (defined $b)
+	# {
+		# print "\nC is not defined";
+		# print $a ," ",$b;
+		# $joinstr =~ s/$joinrgx/$1\.join\($2\)/g;		
+	# }
 
-$rgx1 = qr/(david .* hots for )(.*)( :\))/;
+	print "\n",$joinstr;
 
-    if( $joinstr =~ /david/ ) #/(david(.*)(hots for ){1}(.*) :)/g )
-    {
-		# print "Whole: $1","\n","The next $2 $3 $4";
-		# $a=$1;
-		# $b=$2;
-		# $c=$3;
-	    # if (defined $3)
-	    # {
-	    # 	print "\n\$3 is empty";
-	    # }
-	    # if (defined $3)
-	    # {
-	  #   	print "\n\$4 is empty\n";
-			# print "\$a is $a","\n","\$b is $2 \$c is $3";
-			($a,$b,$c) = ($joinstr =~ /$rgx1/);
-			print $a ," ",$b," ",$c;
-			$joinstr =~ s/$a$b/$b/g;
-			print "\n",$joinstr;
-	    # }
-	}
-my $ctrlstmtrgx = qr/(?:^\s*[#}]*\s*(while|if|elsif|else if|else|foreach|for))/im;
-$mystr = '} elsif ($a == 0) {';
+# my $ctrlstmtrgx = qr/(?:^\s*[#}]*\s*(while|if|elsif|else if|else|foreach|for))/im;
+# $mystr = '} elsif ($a == 0) {';
 
-if ( $mystr =~ /$ctrlstmtrgx/)
-{print "IN HERE";}
+# if ( $mystr =~ /$ctrlstmtrgx/)
+# {print "IN HERE";}

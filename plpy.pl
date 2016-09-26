@@ -195,17 +195,22 @@ sub handle_join
 {
     my ($trans) = @_;
     my $transformed = 1;
-    my $joinrgx = qr/(join\s*\(\s*(.*?)\s*,\s*(?:(?:\(?\s*@?(\w+)\s*\)?)|\((.*?)\))\s*\))/;
+    my $joinrgx = qr/join\s*\(\s*(.*?)\s*,\s*(?:(?:\(?\s*@?(\w+)\s*\)?)|\((.*?)\))\s*\)/;
     
 ##### Transforming $str = join('blah',@arr) -> str = arr.join('blah') #####
-    if( $trans =~ /$joinrgx/ )
+    # ($a,$b,$c) = ($trans =~ /$joinrgx/);
+
+    if ($trans =~ /$joinrgx/)
     {
-        if ( $3 eq "")
+        if (defined $3)
         {
+            $trans =~ s/$joinrgx/\($1\)\.join\($3\)/g;
+            $transformed = 0;
         }
-        elsif ($4 eq "")
+        else
         {
-            $trans =~ s/$1/$3\.join($4)/g;
+            $trans =~ s/$joinrgx/\($1\)\.join\($2\)/g;
+            $transformed = 0;
         }
     }
 
@@ -228,7 +233,8 @@ sub handle_variable
 ##### Handle i++s and i--s in the expression #####
     ($t1, $trans) = handle_pp_mm($trans);
 ##### 
-    # ($t2, $trans) = handle_join($trans);
+    ($t2, $trans) = handle_join($trans);
+
     if ( $trans =~ /STDIN/)
     {
         $trans = handle_stdin($trans);  # If <STDIN> is found changes it to sys.readline()
@@ -239,12 +245,12 @@ sub handle_variable
 
     if ($trans =~ /\$\#(\w+)/)
     {
-        my $tempvar = $2;
+        my $tempvar = $1;
         if ( $tempvar eq ARGV)
         {$trans =~ s/\$\#ARGV/len\(sys.argv\)/g;}
         else
         {
-            $trans =~ s/(\$\#)(\w+)/len\($2\)/;     # Replaces #$array with len(array)
+            $trans =~ s/\$\#(\w+)/len\($1\)/;     # Replaces #$array with len(array)
         }
 
         $import{"import sys\n"} = 1;
@@ -357,6 +363,7 @@ sub handle_for
     if ( $string =~ /\s*(?:for|foreach)\s*\((.*?);(.*?);(.*?)\)/)
     {
         my $var;
+
         ##### Handle i++s and i--s in the expression
 
 ##### The following section of code had insights from this forum contribution #####
@@ -584,6 +591,5 @@ foreach $i (@pyarray)
         $bracescount++;
         $pytabindent++;
     }
-    # print "BRACE CNT: $bracescount";
 }
 
