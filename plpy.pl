@@ -217,6 +217,29 @@ sub handle_join
 return ($transformed, $trans);
 }
 
+sub handle_pushpop_etc
+{
+    my ($trans) = @_;
+    my $transformed = 1;
+
+    if ( $trans =~ /pop\s*\(?\s*\@\s*(\w+)\s*\)?/g)
+    {
+        $trans =~ s/pop\s*\(?\s*\@\s*(\w+)\s*\)?/$1\.pop/g;
+    }
+    elsif ( $trans =~ /pop\s*\(?\s*\@\s*(\w+)\s*\)?/g)
+    {
+
+    }
+    elsif ( $trans =~ /shift\s*\(?\s*\@\s*(\w+)\s*\)?/g)
+    {
+        
+    }
+    elsif ( $trans =~ /shift\s*\(?\s*\@\s*(\w+)\s*\)?/g)
+    {
+        
+    }
+}
+
 sub handle_variable
 {
 
@@ -232,7 +255,7 @@ sub handle_variable
 
 ##### Handle i++s and i--s in the expression #####
     ($t1, $trans) = handle_pp_mm($trans);
-##### 
+##### Handle join a string #####
     ($t2, $trans) = handle_join($trans);
 
     if ( $trans =~ /STDIN/)
@@ -376,7 +399,12 @@ sub handle_for
         ($init,$condition,$exp) = $string =~ /\s*(?:for|foreach)\s*\(\s*(.*?)\s*;\s*(.*?)\s*;\s*(.*?)\s*\)/ ;
         
         $condition = 'while'." $condition :";
-        $string = $init."\n".$condition."\n"."\t"; #.$exp."\n";
+
+        if ($init =~ /#/)
+        {
+            $init =~ s/#(\w+)/len($1)/g;
+        }
+        $string = $init."\n".$condition."\n"."\t";
         push (@loopexpression, $exp);                   # push expressions onto an array and print before the closing braces;
     }
 return $string;
@@ -531,6 +559,18 @@ while ($line = <>)
     push (@pyarray , "#".$line."\n");   # else comment the code and print it out
 }
 
+
+
+##### Assess the type of the STDIN if any at all ######
+
+foreach $i (@pyarray)
+{
+    if ( $i =~ /sys\.stdin\.readlines?/ )
+    {
+        $i =~ s/sys\.stdin\.readlines?\(\)/int\(sys\.stdin\.readline\(\)\)/;
+    }
+}
+
 my $endbrace = qr/#*\s*}\s*$/;
 my $bracescount=0;
 my @Cstylebraccnt;
@@ -570,7 +610,7 @@ foreach $i (@pyarray)
         $i =~ s/^/$tabspacing/mg;
 
         if ($i =~ /^.*[{]\s*$/)
-        {}                          # Dont print {
+        {}                          # Dont print the '{'
         else
         {print $i;}
     }
@@ -592,4 +632,3 @@ foreach $i (@pyarray)
         $pytabindent++;
     }
 }
-

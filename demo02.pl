@@ -1,6 +1,8 @@
 #!/usr/bin/perl -w
 # Script to take an input from STDIN and print it out
 
-@arr = ( 1,2 ,3 ,4 ,5 );
+@arr = ( "how are you\n","i am fine\n" );
 
-print @arr;
+print scalar @arr;
+
+print "\n", $arr[0];

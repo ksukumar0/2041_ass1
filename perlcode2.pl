@@ -25,10 +25,13 @@ my $joinrgx = qr/join\s*\(\s*(.*?)\s*,\s*(?:(?:\(?\s*@?(\w+)\s*\)?)|\((.*?)\))\s
 		# $joinstr =~ s/$joinrgx/$1\.join\($2\)/g;		
 	# }
 
-	print "\n",$joinstr;
+	print "\n",$joinstr,"\n";
 
-# my $ctrlstmtrgx = qr/(?:^\s*[#}]*\s*(while|if|elsif|else if|else|foreach|for))/im;
-# $mystr = '} elsif ($a == 0) {';
+my @a = ('a','b','c');
 
-# if ( $mystr =~ /$ctrlstmtrgx/)
-# {print "IN HERE";}
+foreach $i (@a)
+{
+	$i .= "\n";
+}
+
+print @a;

@@ -25,3 +25,5 @@ b = sys.argv[1:]
 
 arr = ('a','b','c')
 print ("|".join(arr))
+arr = arr[2:]
+print (arr)
