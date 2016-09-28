@@ -22,12 +22,15 @@ a = [1,2,3]
 a = a[1:]
 a.append(1)
 b = sys.argv[1:]
-
-# arr = ('a','b','c')
-# print ("|".join(arr))
-# arr = arr[2:]
-# print (arr)
-
 arr = "abcbdbebfgh"
 arr = arr.split ('b')
 print(arr)
+
+arr = ['a','b','c']
+arr2 = ['e','d','f']
+# print ("|".join(arr))
+# arr = arr[2:]
+arr.extend(arr2)
+
+print (arr.pop())
+print (arr)

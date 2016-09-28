@@ -37,17 +37,37 @@ my %operators = (
     "eq" => "==",
     "ne" => "!=",
     );
-$j = "a > b";
-$regex = join ('|', values (%operators));
-if ( $j =~ /$regex/ )
+my %cmds = (
+	"1" => "join",
+	"2" => "split",
+	"3" => "push",
+	);
+my $cmd = join ('|', values (%cmds));
+my @cmdarr;
+$i = q/join ('|', split( \/a\/, @var2) ); push/;
+
+if ( $i =~ /$cmd/)
 {
-	print "Accepted\n";
+
+	@cmdarr = ($i =~ /$cmd/g);
 }
-else
+# print join("\n",@cmdarr);
+while ( @cmdarr)
 {
-	print "Not accepted\n";
+	print pop(@cmdarr),"\n";
 }
 
-$splitword = "abcdeefbcgh";
-split("bc",$splitword);
-print join ( '|',split("bc",$splitword),"\n");
+# $j = "a > b";
+# $regex = join ('|', values (%operators));
+# if ( $j =~ /$regex/ )
+# {
+# 	print "Accepted\n";
+# }
+# else
+# {
+# 	print "Not accepted\n";
+# }
+
+# $splitword = "abcdeefbcgh";
+# split("bc",$splitword);
+# print join ( '|',split("bc",$splitword),"\n");

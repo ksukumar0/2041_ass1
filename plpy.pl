@@ -191,13 +191,22 @@ sub handle_pp_mm
     return ($transformed, $trans);
 }
 
-sub handle_join_split
+my %arraymanipulatecmds = (
+    "1" => "join",
+    "2" => "split",
+    "3" => "push",
+    "4" => "pop",
+    "5" => "shift",
+    "6" => "unshift",
+    );
+
+sub handle_join
 {
     my ($trans) = @_;
     my $transformed = 1;
     my $joinrgx = qr/join\s*\(\s*(.*?)\s*,\s*(?:(?:\(?\s*@?(\w+)\s*\)?)|\((.*?)\))\s*\)/;
-    my $splitrgx = qr/split\s*\(?\s*\/(.*?)\/\s*,\s*@(\w+)\s*,?\,\s*(\d+)\)/;
-    my $splitrgxnolimit = qr/split\s*\(?\s*\/(.*?)\/\s*,\s*@(\w+)\s*,?\,?\s*\)/;
+    my $splitrgx = qr/split\s*\(?\s*\/(.*?)\/\s*,\s*@?(\w+)\s*,?\,\s*(\d+)\)/;
+    my $splitrgxnolimit = qr/split\s*\(?\s*\/(.*?)\/\s*,\s*@?(\w+)\s*,?\,?\s*\)/;
 
 ##### Transforming $str = join('blah',@arr) -> str = arr.join('blah') #####
 
@@ -215,7 +224,15 @@ sub handle_join_split
         }
     }
 
-##### Transforming $str = split (/pat/ , exp, limit ) into exp.split('pat',limit) #####
+return ($transformed, $trans);
+}
+
+sub handle_split
+{
+    my ($trans) = @_;
+    my $transformed = 1;
+
+    ##### Transforming $str = split (/pat/ , exp, limit ) into exp.split('pat',limit) #####
  
     if ( $trans =~ /$splitrgx/g)
     {
@@ -228,31 +245,49 @@ sub handle_join_split
         $trans =~ s/$splitrgxnolimit/$2\.split\(\'$1\'\)/g;
         $transformed = 0;
     }
-
-return ($transformed, $trans);
+return ($transformed, $trans);  
 }
 
-sub handle_pushpop_etc
+sub handle_push
 {
     my ($trans) = @_;
     my $transformed = 1;
+    my $pushrgx = qr/push\s*\(?\s*@?(\w+)\s*,\s*[@\$]?(\w+)\s*\)/;
 
-    if ( $trans =~ /pop\s*\(?\s*\@\s*(\w+)\s*\)?/g)
+    if ( $trans =~ /$pushrgx/g)
     {
-        $trans =~ s/pop\s*\(?\s*\@\s*(\w+)\s*\)?/$1\.pop/g;
+        $trans =~ s/$pushrgx/$1\.extend\($2\)/g;
+        $transformed = 0;
     }
-    elsif ( $trans =~ /pop\s*\(?\s*\@\s*(\w+)\s*\)?/g)
-    {
+    return ($transformed,$trans);
+}
 
-    }
-    elsif ( $trans =~ /shift\s*\(?\s*\@\s*(\w+)\s*\)?/g)
+sub handle_pop
+{
+    my ($trans) = @_;
+    my $transformed = 1;
+    my $poprgx = qr/pop\s*\(?\s*@?(\w+)\s*\)?/;
+
+    if ( $trans =~ /$poprgx/g)
     {
-        
+        $trans =~ s/$poprgx/$1\.pop\(\)/g;
+        $transformed = 0;
     }
-    elsif ( $trans =~ /shift\s*\(?\s*\@\s*(\w+)\s*\)?/g)
+    return ($transformed,$trans);
+}
+
+sub handle_shift
+{
+    my ($trans) = @_;
+    my $transformed = 1;
+    my $poprgx = qr/pop\s*\(?\s*@?(\w+)\s*\)?/;
+
+    if ( $trans =~ /$poprgx/g)
     {
-        
+        $trans =~ s/$poprgx/$1\.pop\(\)/g;
+        $transformed = 0;
     }
+    return ($transformed,$trans);
 }
 
 sub convert_dollar_hash
@@ -288,7 +323,8 @@ sub handle_variable
 ##### Handle i++s and i--s in the expression #####
     ($t1, $trans) = handle_pp_mm($trans);
 ##### Handle join a string #####
-    ($t2, $trans) = handle_join_split($trans);
+    # ($t2, $trans) = handle_join($trans);
+    ($t2, $trans) = handle_push($trans);
 
     if ( $trans =~ /STDIN/)
     {
