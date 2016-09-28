@@ -191,14 +191,15 @@ sub handle_pp_mm
     return ($transformed, $trans);
 }
 
-sub handle_join
+sub handle_join_split
 {
     my ($trans) = @_;
     my $transformed = 1;
     my $joinrgx = qr/join\s*\(\s*(.*?)\s*,\s*(?:(?:\(?\s*@?(\w+)\s*\)?)|\((.*?)\))\s*\)/;
-    
+    my $splitrgx = qr/split\s*\(?\s*\/(.*?)\/\s*,\s*@(\w+)\s*,?\,\s*(\d+)\)/;
+    my $splitrgxnolimit = qr/split\s*\(?\s*\/(.*?)\/\s*,\s*@(\w+)\s*,?\,?\s*\)/;
+
 ##### Transforming $str = join('blah',@arr) -> str = arr.join('blah') #####
-    # ($a,$b,$c) = ($trans =~ /$joinrgx/);
 
     if ($trans =~ /$joinrgx/)
     {
@@ -212,6 +213,20 @@ sub handle_join
             $trans =~ s/$joinrgx/\($1\)\.join\($2\)/g;
             $transformed = 0;
         }
+    }
+
+##### Transforming $str = split (/pat/ , exp, limit ) into exp.split('pat',limit) #####
+ 
+    if ( $trans =~ /$splitrgx/g)
+    {
+        my $temp = $3-1;
+        $trans =~ s/$splitrgx/$2\.split\(\'$1\',$temp\)/g;
+        $transformed = 0;
+    }
+    if ( $trans =~ /$splitrgxnolimit/g)
+    {
+        $trans =~ s/$splitrgxnolimit/$2\.split\(\'$1\'\)/g;
+        $transformed = 0;
     }
 
 return ($transformed, $trans);
@@ -273,7 +288,7 @@ sub handle_variable
 ##### Handle i++s and i--s in the expression #####
     ($t1, $trans) = handle_pp_mm($trans);
 ##### Handle join a string #####
-    ($t2, $trans) = handle_join($trans);
+    ($t2, $trans) = handle_join_split($trans);
 
     if ( $trans =~ /STDIN/)
     {

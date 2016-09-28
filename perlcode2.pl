@@ -41,10 +41,13 @@ $j = "a > b";
 $regex = join ('|', values (%operators));
 if ( $j =~ /$regex/ )
 {
-	print "Accepted";
+	print "Accepted\n";
 }
 else
 {
-	print "Not accepted";
+	print "Not accepted\n";
 }
 
+$splitword = "abcdeefbcgh";
+split("bc",$splitword);
+print join ( '|',split("bc",$splitword),"\n");
