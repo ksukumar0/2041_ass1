@@ -559,22 +559,68 @@ while ($line = <>)
     push (@pyarray , "#".$line."\n");   # else comment the code and print it out
 }
 
+my $endbrace = qr/#*\s*}\s*$/;
+my $bracescount=0;
+my @Cstylebraccnt;
+my $indent = "\t";
+
+my %stdinvariables;
+my %arithmeticops = (
+    "gt" => ">",
+    "lt" => "<",
+    "le" => "<=",
+    "ge" => ">=",
+    "eq" => "==",
+    "ne" => "!=",
+    );
+my $allarithops = join ('|', values(%arithmeticops));
+print $allarithops,"\n";
+
+##### Assess the type of the STDIN if any at all ######
+
+foreach $i (@pyarray)
+{
+    if ( $i =~ /(\w+)\s*=\s*sys\.stdin\.readlines?/ )
+    {
+        $stdinvariables{$1} = "str";
+    }
+}
+
+foreach $i (@pyarray)
+{
+    foreach $stdvar (sort keys %stdinvariables)
+    {
+        if( $i =~ /$stdvar\s*$allarithops/)
+        {
+            print $i,$stdvar,"FOUND\n";
+            if ( $i =~ /$stdvar\s*($allarithops)\s*\d+\.\d+/)
+            {
+                $stdinvariables{$stdvar} = "float";
+            }
+            elsif ( $i =~ /$stdvar\s*($allarithops)\s*["].*["]/)
+            {
+               $stdinvariables{$stdvar} = "str";
+            }
+            else
+            {
+               $stdinvariables{$stdvar} = "int";
+            }
+        }
+    }
+}
 
 
+print %stdinvariables,"\n";
 ##### Assess the type of the STDIN if any at all ######
 
 foreach $i (@pyarray)
 {
     if ( $i =~ /sys\.stdin\.readlines?/ )
     {
+
         $i =~ s/sys\.stdin\.readlines?\(\)/int\(sys\.stdin\.readline\(\)\)/;
     }
 }
-
-my $endbrace = qr/#*\s*}\s*$/;
-my $bracescount=0;
-my @Cstylebraccnt;
-my $indent = "\t";
 
 ##### Insert the import statements ######
 

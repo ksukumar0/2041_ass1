@@ -27,11 +27,24 @@ my $joinrgx = qr/join\s*\(\s*(.*?)\s*,\s*(?:(?:\(?\s*@?(\w+)\s*\)?)|\((.*?)\))\s
 
 	print "\n",$joinstr,"\n";
 
-my @a = ('a','b','c');
-
-foreach $i (@a)
+my %operators = (
+    "\\|\\|" => "or",
+    "&&" => "and",
+    "gt" => ">",
+    "lt" => "<",
+    "le" => "<=",
+    "ge" => ">=",
+    "eq" => "==",
+    "ne" => "!=",
+    );
+$j = "a > b";
+$regex = join ('|', values (%operators));
+if ( $j =~ /$regex/ )
 {
-	$i .= "\n";
+	print "Accepted";
+}
+else
+{
+	print "Not accepted";
 }
 
-print @a;
