@@ -204,9 +204,8 @@ sub handle_join
 {
     my ($trans) = @_;
     my $transformed = 1;
+
     my $joinrgx = qr/join\s*\(\s*(.*?)\s*,\s*(?:(?:\(?\s*@?(\w+)\s*\)?)|\((.*?)\))\s*\)/;
-    my $splitrgx = qr/split\s*\(?\s*\/(.*?)\/\s*,\s*@?(\w+)\s*,?\,\s*(\d+)\)/;
-    my $splitrgxnolimit = qr/split\s*\(?\s*\/(.*?)\/\s*,\s*@?(\w+)\s*,?\,?\s*\)/;
 
 ##### Transforming $str = join('blah',@arr) -> str = arr.join('blah') #####
 
@@ -231,6 +230,9 @@ sub handle_split
 {
     my ($trans) = @_;
     my $transformed = 1;
+
+    my $splitrgx = qr/split\s*\(?\s*\/(.*?)\/\s*,\s*@?(\w+)\s*,?\,\s*(\d+)\)/;
+    my $splitrgxnolimit = qr/split\s*\(?\s*\/(.*?)\/\s*,\s*@?(\w+)\s*,?\,?\s*\)/;
 
     ##### Transforming $str = split (/pat/ , exp, limit ) into exp.split('pat',limit) #####
  
@@ -280,11 +282,11 @@ sub handle_shift
 {
     my ($trans) = @_;
     my $transformed = 1;
-    my $poprgx = qr/pop\s*\(?\s*@?(\w+)\s*\)?/;
+    my $poprgx = qr//;
 
-    if ( $trans =~ /$poprgx/g)
+    if ( $trans =~ /./g)
     {
-        $trans =~ s/$poprgx/$1\.pop\(\)/g;
+        $trans =~ s///g;
         $transformed = 0;
     }
     return ($transformed,$trans);

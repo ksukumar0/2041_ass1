@@ -27,6 +27,10 @@ my $joinrgx = qr/join\s*\(\s*(.*?)\s*,\s*(?:(?:\(?\s*@?(\w+)\s*\)?)|\((.*?)\))\s
 
 	print "\n",$joinstr,"\n";
 
+
+
+
+
 my %operators = (
     "\\|\\|" => "or",
     "&&" => "and",
@@ -41,6 +45,7 @@ my %cmds = (
 	"1" => "join",
 	"2" => "split",
 	"3" => "push",
+	"4" => "pop",
 	);
 my $cmd = join ('|', values (%cmds));
 my @cmdarr;
@@ -56,6 +61,64 @@ while ( @cmdarr)
 {
 	print pop(@cmdarr),"\n";
 }
+
+sub handle_pop
+{
+    my ($trans) = @_;
+    my $poprgx = qr/pop\s*\(?\s*@(\w+)\s*\)?/;
+
+    if ( $trans =~ /$poprgx/)
+    {
+        $trans =~ s/$poprgx/$1\.pop\(\)/g;
+
+		$trans = "$1\.pop\(\)";
+        # print $trans;
+    }
+    return ($trans);
+}
+
+my $globvar;
+
+$a = 'pop pop pop pop @arr;';
+if ( $a =~ /$cmd/)
+{
+
+	@cmdarr = ($a =~ /$cmd/g);
+}
+
+my @temp;
+my $k = 0;
+my $poprgx = qr/pop @(\w+)/;
+my @x1y1z1bg1;
+
+foreach $i (reverse @cmdarr)
+{
+	if ( $a =~ /$poprgx/)
+	{
+		push @x1y1z1bg1, handle_pop($a);
+
+		$glob = '@x1y1z1bg1';
+		$a =~ s/$poprgx/$glob/;
+
+		# print $a;
+		# print "\n",$k;
+		# print eval @temp;
+		# $k++;
+	}
+}
+
+my $final = $x1y1z1bg1[0];
+
+while (@x1y1z1bg1)
+{
+	my $temp = 	shift (@x1y1z1bg1);
+	$temp =~ s/x1y1z1bg1/$final/;
+	$final = $temp;
+}
+
+print $final; 
+# print $a;
+# print eval $;
 
 # $j = "a > b";
 # $regex = join ('|', values (%operators));
