@@ -574,7 +574,6 @@ my %arithmeticops = (
     "ne" => "!=",
     );
 my $allarithops = join ('|', values(%arithmeticops));
-print $allarithops,"\n";
 
 ##### Assess the type of the STDIN if any at all ######
 
@@ -605,15 +604,16 @@ foreach $i (@pyarray)
     }
 }
 
-print %stdinvariables,"\n";
 ##### Assess the type of the STDIN if any at all ######
 
 foreach $i (@pyarray)
 {
-    if ( $i =~ /sys\.stdin\.readlines?/ )
+    foreach my $j (sort keys %stdinvariables)
     {
-
-        $i =~ s/sys\.stdin\.readlines?\(\)/int\(sys\.stdin\.readline\(\)\)/;
+        if ( $i =~ /$j\s*=\s*sys\.stdin\.readlines?/ )
+        {
+            $i =~ s/sys\.stdin\.readlines?\(\)/$stdinvariables{$j}\(sys\.stdin\.readline\(\)\)/;
+        }
     }
 }
 
