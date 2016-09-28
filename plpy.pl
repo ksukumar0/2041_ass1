@@ -584,15 +584,11 @@ foreach $i (@pyarray)
     {
         $stdinvariables{$1} = "str";
     }
-}
-
-foreach $i (@pyarray)
-{
     foreach $stdvar (sort keys %stdinvariables)
     {
-        if( $i =~ /$stdvar\s*$allarithops/)
+        if( $i =~ /$stdvar\s*(?:$allarithops)/)
         {
-            print $i,$stdvar,"FOUND\n";
+            # print $i,$stdvar,"FOUND\n";
             if ( $i =~ /$stdvar\s*($allarithops)\s*\d+\.\d+/)
             {
                 $stdinvariables{$stdvar} = "float";
@@ -608,7 +604,6 @@ foreach $i (@pyarray)
         }
     }
 }
-
 
 print %stdinvariables,"\n";
 ##### Assess the type of the STDIN if any at all ######
