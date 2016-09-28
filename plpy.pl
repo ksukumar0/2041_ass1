@@ -240,6 +240,23 @@ sub handle_pushpop_etc
     }
 }
 
+sub convert_dollar_hash
+{
+    my ($trans) =@_;
+    if ($trans =~ /\$?\#(\w+)/)
+    {
+        my $tempvar = $1;
+        if ( $tempvar eq ARGV)
+        {$trans =~ s/\$?\#ARGV/len\(sys.argv\)/g;}
+        else
+        {
+            $trans =~ s/\$?\#(\w+)/len\($1\)/;     # Replaces #$array with len(array)
+        }
+        $import{"import sys\n"} = 1;
+    }
+return $trans;
+}
+
 sub handle_variable
 {
 
@@ -268,15 +285,7 @@ sub handle_variable
 
     if ($trans =~ /\$\#(\w+)/)
     {
-        my $tempvar = $1;
-        if ( $tempvar eq ARGV)
-        {$trans =~ s/\$\#ARGV/len\(sys.argv\)/g;}
-        else
-        {
-            $trans =~ s/\$\#(\w+)/len\($1\)/;     # Replaces #$array with len(array)
-        }
-
-        $import{"import sys\n"} = 1;
+        $trans = convert_dollar_hash($trans);
         $t6 = 0;
     }
 
@@ -357,6 +366,11 @@ sub handle_for
 {
     my ($string) = @_;
     my $for_regex = qr/(?:for|foreach)(?:\s+(?:my)?\s+|\s+)(\w+?)\s+\((.*)\)/;
+
+    if ($string =~ /\$?\#(\w+)/)
+    {
+        $string = convert_dollar_hash($string);
+    }
 
     if ($string =~ /$for_regex/ )
     {
