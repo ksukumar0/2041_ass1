@@ -529,11 +529,12 @@ sub handle_for
 
         if ( $arr =~ /\s*(\d+)\s*\.\.\s*(.*)\s*/)
         {    
+            my $startrange = $1;
             my $temp = $2;               
             if ( $temp =~ /\d+/)                            # Extract range 0..9     
             {$temp += 1;}
 
-            $arr = "range($1,$temp)";
+            $arr = "range($startrange,$temp)";
         }
                                                         # Extract Array information er @ARGV
         elsif ( $arr =~ /@?([\w\.]+)/)
