@@ -191,9 +191,9 @@ sub handle_pp_mm
     return ($transformed, $trans);
 }
 
-my $poprgx = qr/pop\s*\(?\s*@(\w+)\s*\)?/;
-my $pushrgx = qr/push\s*\(?\s*@?(\w+)\s*,\s*[@\$]?(\w+)\s*\)?/;
-my $shiftrgx = qr/shift\s*\(?@(\w+)/;
+my $poprgx = qr/pop\s*\(?\s*@?([\w:\[\]\.]+)\s*\)?/;
+my $pushrgx = qr/push\s*\(?\s*@?([\w:\[\]\.]+)\s*,\s*[@\$]?([\w:\[\]\.]+)\s*\)?/;
+my $shiftrgx = qr/shift\s*\(?@?([\w:\[\]\.]+)/;
 # my $joinrgx = qr/join\s*\(\s*([^(join)]*?)\s*,\s*(?:(?:\(?\s*@?(\w+)\s*\)?)|\((.*?)\))\s*\)/;
 # my $joinrgx = qr/join\s*\(\s*([^(join)]*?)\s*,\s*\(?\s*@?(\w+)\s*\)/;
 my $joinrgx = qr/join\s*\(\s*([^(join)]*?)\s*,\s*\(?\s*@?([\w\.\[\]:]+)\s*\)/;
@@ -250,7 +250,6 @@ sub handle_pop
     if ( $trans =~ /$poprgx/)
     {
         $trans =~ s/$poprgx/$1\.pop\(\)/g;
-
         $trans = "$1\.pop\(\)";
     }
     return ($trans);
@@ -272,10 +271,18 @@ sub handle_shift
 {
     my ($trans) = @_;
 
-    if ( $trans =~ /$shiftrgx/g)
+    if ( $trans =~ /$shiftrgx/)
     {
-        $trans = "$1\[0\]\n";
-        $trans .= "$1 = $1\[1\:\]"
+        if ( $1 ne "sys\.argv\[1\:\]")
+        {
+            $trans = "$1\[0\]\n";
+            $trans .= "$1 = $1\[1\:\]";
+        }
+        else
+        {
+            $trans = "sys.argv[0]\n";
+            $trans .= "sys.argv = sys\.argv\[1\:\]"
+        }
     }
     return $trans;
 }
