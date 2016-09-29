@@ -35,6 +35,7 @@ my $shiftrgx = qr/shift\s*\(?@?([\w:\[\]\.]+)/;
 my $joinrgx = qr/join\s*\(\s*([^(join)]*?)\s*,\s*\(?\s*@?([\w\.\[\]:]+)\s*\)/;
 my $splitrgx = qr/split\s*\(?\s*\/([^(split)]*?)\/\s*,\s*[\@\$](\w+)\s*,?\,\s*(\d+)\s*\)?/;
 my $splitrgxnolimit = qr/split\s*\(?\s*\/([^(split)]*?)\/\s*,\s*[\@\$](\w+)\s*,?\,?\s*\)?/;
+my $reversergx = qr/reverse\s*@?([\w.:\[\]]+)/;
 
 my %arraymanipulatecmds = (
     "1" => "join",
@@ -43,6 +44,7 @@ my %arraymanipulatecmds = (
     "4" => "push",
     "5" => "shift",
     "6" => "unshift",
+    "7" => "reverse",
     );
 
 my $i;
@@ -86,14 +88,59 @@ sub handle_print
 
 ##### Handle any join/split/shift/etc... #####
 
+##### Join #####
+
     if ($trans =~ /$joinrgx/)
     {
         $trans =~ s/$joinrgx/\($1\)\.join\($2\)/g;
     }
 
-    if ($trans =~ /$splitrgx/)
+##### Split #####
+
+    if ( $trans =~ /$splitrgx/)
     {
-        
+        my $temp = $3-1;
+        $trans =~ s/$splitrgx/$2\.split\(\'$1\',$temp\)/g;
+    }
+
+    if ( $trans =~ /$splitrgxnolimit/)
+    {
+        $trans =~ s/$splitrgxnolimit/$2\.split\(\'$1\'\)/g;
+    }
+
+##### Shift #####
+
+    if ( $trans =~ /$shiftrgx/)
+    {
+        if ( $1 ne "sys\.argv\[1\:\]")
+        {
+            $trans =~ s/$shiftrgx/$1\[0\]/g;
+            # $trans = $trans."\n$1 = $1\[1\:\]\n";
+        }
+        else
+        {
+            $trans =~ s/$shiftrgx/sys\.argv\[0\]/g;
+            # $trans = $trans."\nsys.argv = sys\.argv\[1\:\]\n";
+        }
+    }
+
+##### PUSH #####
+
+    if ( $trans =~ /$pushrgx/)
+    {
+        $trans =~ s/$pushrgx/$1\.extend\($2\)/g;
+    }
+
+##### POP #####
+    if ( $trans =~ /$poprgx/)
+    {
+        $trans =~ s/$poprgx/$1\.pop\(\)/g;
+    }
+##### Reverse #####
+    
+    if ( $trans =~/$reversergx/)
+    {
+        $trans =~ s/$reversergx/$1\.reverse\(\)/g;
     }
 
 ##### print simple variables if the line only has variables without newline #####
@@ -286,7 +333,6 @@ sub handle_push
     if ( $trans =~ /$pushrgx/g)
     {
         $trans =~ s/$pushrgx/$1\.extend\($2\)/g;
-
         $trans = "$1\.extend\($2\)";
     }
     return $trans;
@@ -310,6 +356,17 @@ sub handle_shift
         }
     }
     return $trans;
+}
+
+sub handle_reverse
+{
+    my ($trans) = @_;
+
+    if ( $trans =~ /$reversergx/)
+    {
+        $trans = "$1.reverse\(\)"; 
+    }
+    return $trans;   
 }
 
 sub handle_arrayprocess
@@ -365,6 +422,13 @@ sub handle_arrayprocess
 
             $glob = '@x1y1z1bg1';
             $a =~ s/$shiftrgx/$glob/;
+        }
+        elsif ($i eq "reverse")
+        {
+            push @x1y1z1bg1, handle_reverse($a);
+
+            $glob = '@x1y1z1bg1';
+            $a =~ s/$reversergx/$glob/;  
         }
     }
 my $final = $x1y1z1bg1[0];
