@@ -281,8 +281,8 @@ sub handle_shift
 my %arraymanipulatecmds = (
     "1" => "join",
     "2" => "split",
-    "3" => "push",
-    "4" => "pop",
+    "3" => "pop",
+    "4" => "push",
     "5" => "shift",
     "6" => "unshift",
     );
@@ -301,9 +301,7 @@ sub handle_arrayprocess
     if ( $a =~ /$cmd/)
     {
         @cmdarr = ($a =~ /$cmd/g);
-
         ##### getting the assignment variable if any #####
-
         if ($a =~ /\$(\w+)\s*=/ )
         {
             $assignmentvar = $1;
@@ -312,6 +310,7 @@ sub handle_arrayprocess
 
     foreach $i (reverse @cmdarr)
     {
+        my $glob;
         if ( $i eq "pop")
         {
             push @x1y1z1bg1, handle_pop($a);
@@ -347,7 +346,6 @@ sub handle_arrayprocess
             $glob = '@x1y1z1bg1';
             $a =~ s/$shiftrgx/$glob/;
         }
-        # print $a,"\n";
     }
 my $final = $x1y1z1bg1[0];
 
@@ -380,7 +378,7 @@ sub convert_dollar_hash
         {$trans =~ s/\$?\#ARGV/len\(sys.argv\)/g;}
         else
         {
-            $trans =~ s/\$?\#(\w+)/len\($1\)/;     # Replaces #$array with len(array)
+            $trans =~ s/\$?\#(\w+)/len\($1\)/g;     # Replaces #$array with len(array)
         }
         $import{"import sys\n"} = 1;
     }
@@ -402,9 +400,6 @@ sub handle_variable
 
 ##### Handle i++s and i--s in the expression #####
     ($t1, $trans) = handle_pp_mm($trans);
-##### Handle join a string #####
-    # ($t2, $trans) = handle_join($trans);
-    # ($t2, $trans) = handle_push($trans);
 
     if ( $trans =~ /STDIN/)
     {
@@ -442,7 +437,7 @@ sub handle_variable
     my @localvar;
 
     if( $trans =~ /@\s*(\w+)/)          # looks for @ARGV and changes to sys.argv[1:]
-    {                                   # Also gets rid of the sigil for arrays and dicts
+    {                                   # Also gets rid of the sigil for arrays
         @localvar = $trans =~ /\s*@\s*(\w+)\s*/g;
         # print @localvar;
         $trans =~ s/(@\s*)(\w+)/$2/g;
@@ -532,13 +527,13 @@ sub handle_for
     {
         my $var;
 
-        ##### Handle i++s and i--s in the expression
-
 ##### The following section of code had insights from this forum contribution #####
 ##### http://www.perlmonks.org/?node_id=723825 #####
         my $init;
         my $condition;
         my $exp;
+
+        ##### Handle i++s and i--s in the expression
         ($var, $string) = handle_pp_mm($string);
 
         ($init,$condition,$exp) = $string =~ /\s*(?:for|foreach)\s*\(\s*(.*?)\s*;\s*(.*?)\s*;\s*(.*?)\s*\)/ ;
@@ -646,6 +641,16 @@ sub handle_controlstatements
         $trans =~ s/next\s*;\s*:*}?\s*:*$/continue/;
         $transformed = 0;
     }
+
+##### Handle exit statements #####
+
+    if ( $trans =~ /exit\s*(\d+)\s*;\s*:*}?\s*:*$/ )
+    {
+        $trans =~ s/exit\s*(\d+)\s*;\s*:*}?\s*:*$/sys\.exit($1)/;
+        $import{"import sys\n"} = 1;
+        $transformed = 0;
+    }
+
 
 if ($transformed == 0)
 {push (@pyarray,$trans."\n");}

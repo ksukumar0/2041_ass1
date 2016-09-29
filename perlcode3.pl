@@ -90,10 +90,6 @@ sub handle_shift
     return $trans;
 }
 
-my $globvar;
-my $i;
-my @cmdarr;
-
 my %arraymanipulatecmds = (
     "1" => "join",
     "2" => "split",
@@ -103,6 +99,8 @@ my %arraymanipulatecmds = (
     "6" => "unshift",
     );
 
+my $i;
+my @cmdarr;
 my $cmd = join ('|', values (%arraymanipulatecmds));
 my @x1y1z1bg1;
 
@@ -116,15 +114,14 @@ $a = 'push( @arr , join (\'|\' , split ( /b/ ,$str , 3 )));';
 ##### MAIN STRING END #####
 
 $assignmentvar = "";
-if ($a =~ /\$(\w+)\s*=/ )
-{
-	$assignmentvar = $1;
-}
 
 if ( $a =~ /$cmd/)
 {
-
 	@cmdarr = ($a =~ /$cmd/g);
+	if ($a =~ /\$(\w+)\s*=/ )
+	{
+		$assignmentvar = $1;
+	}
 }
 
 foreach $i (reverse @cmdarr)
