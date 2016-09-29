@@ -536,7 +536,6 @@ sub handle_for
                                                         # Extract Array information er @ARGV
         if ( $arr =~ /@?([\w\.]+)/)
         {
-            print $1;
             $arr = $1;
             if( $arr eq "sys\.argv")
             {
