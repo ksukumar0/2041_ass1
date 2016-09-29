@@ -27,6 +27,29 @@ my @loopexpression;     # Global variable which remembers the expression for the
                         # of the loop when using a C style for loop
 my %vartype;
 
+my $poprgx = qr/pop\s*\(?\s*@?([\w:\[\]\.]+)\s*\)?/;
+my $pushrgx = qr/push\s*\(?\s*@?([\w:\[\]\.]+)\s*,\s*[@\$]?([\w:\[\]\.]+)\s*\)?/;
+my $shiftrgx = qr/shift\s*\(?@?([\w:\[\]\.]+)/;
+# my $joinrgx = qr/join\s*\(\s*([^(join)]*?)\s*,\s*(?:(?:\(?\s*@?(\w+)\s*\)?)|\((.*?)\))\s*\)/;
+# my $joinrgx = qr/join\s*\(\s*([^(join)]*?)\s*,\s*\(?\s*@?(\w+)\s*\)/;
+my $joinrgx = qr/join\s*\(\s*([^(join)]*?)\s*,\s*\(?\s*@?([\w\.\[\]:]+)\s*\)/;
+my $splitrgx = qr/split\s*\(?\s*\/([^(split)]*?)\/\s*,\s*[\@\$](\w+)\s*,?\,\s*(\d+)\s*\)?/;
+my $splitrgxnolimit = qr/split\s*\(?\s*\/([^(split)]*?)\/\s*,\s*[\@\$](\w+)\s*,?\,?\s*\)?/;
+
+my %arraymanipulatecmds = (
+    "1" => "join",
+    "2" => "split",
+    "3" => "pop",
+    "4" => "push",
+    "5" => "shift",
+    "6" => "unshift",
+    );
+
+my $i;
+my @cmdarr;
+my $cmd = join ('|', values (%arraymanipulatecmds));
+my @x1y1z1bg1;
+
 sub handle_shebang
 {
     my ($trans) = @_;
@@ -61,6 +84,18 @@ sub handle_print
     my $r;
     my $loc;
 
+##### Handle any join/split/shift/etc... #####
+
+    if ($trans =~ /$joinrgx/)
+    {
+        $trans =~ s/$joinrgx/\($1\)\.join\($2\)/g;
+    }
+
+    if ($trans =~ /$splitrgx/)
+    {
+        
+    }
+
 ##### print simple variables if the line only has variables without newline #####
     if ($trans =~ /$print_only_var_without_nl_regex/)
     {
@@ -73,7 +108,6 @@ sub handle_print
         $temp = "print\($variable_print,end=\"\"\)\n";
 
         push (@pyarray,$temp);
-
         return 0;
     }
 ##### print simple variables if the line only has variables without newline #####
@@ -191,15 +225,6 @@ sub handle_pp_mm
     return ($transformed, $trans);
 }
 
-my $poprgx = qr/pop\s*\(?\s*@?([\w:\[\]\.]+)\s*\)?/;
-my $pushrgx = qr/push\s*\(?\s*@?([\w:\[\]\.]+)\s*,\s*[@\$]?([\w:\[\]\.]+)\s*\)?/;
-my $shiftrgx = qr/shift\s*\(?@?([\w:\[\]\.]+)/;
-# my $joinrgx = qr/join\s*\(\s*([^(join)]*?)\s*,\s*(?:(?:\(?\s*@?(\w+)\s*\)?)|\((.*?)\))\s*\)/;
-# my $joinrgx = qr/join\s*\(\s*([^(join)]*?)\s*,\s*\(?\s*@?(\w+)\s*\)/;
-my $joinrgx = qr/join\s*\(\s*([^(join)]*?)\s*,\s*\(?\s*@?([\w\.\[\]:]+)\s*\)/;
-my $splitrgx = qr/split\s*\(?\s*\/([^(split)]*?)\/\s*,\s*[\@\$](\w+)\s*,?\,\s*(\d+)\s*\)?/;
-my $splitrgxnolimit = qr/split\s*\(?\s*\/([^(split)]*?)\/\s*,\s*[\@\$](\w+)\s*,?\,?\s*\)?/;
-
 sub handle_join
 {
     my ($trans) = @_;
@@ -286,20 +311,6 @@ sub handle_shift
     }
     return $trans;
 }
-
-my %arraymanipulatecmds = (
-    "1" => "join",
-    "2" => "split",
-    "3" => "pop",
-    "4" => "push",
-    "5" => "shift",
-    "6" => "unshift",
-    );
-
-my $i;
-my @cmdarr;
-my $cmd = join ('|', values (%arraymanipulatecmds));
-my @x1y1z1bg1;
 
 sub handle_arrayprocess
 {
@@ -720,6 +731,9 @@ while ($line = <>)
     $line = convert_dollar_hash($line);
     $line = convert_ARGV($line);
 
+    if (!handle_print($line))               # Handles prints
+    {next;}
+
     $tmp = handle_arrayprocess($line);      # Handles array manipulations, checks every line
     if ( $tmp eq $line || $tmp eq "" )
     {}
@@ -728,9 +742,6 @@ while ($line = <>)
         push (@pyarray, $tmp."\n");
         next;
     }
-
-    if (!handle_print($line))               # Handles prints
-    {next;}
 
     if (!handle_controlstatements($line))
     {next;}                                 # Handles control statements like while/for/foreach etc...

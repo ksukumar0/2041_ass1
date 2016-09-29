@@ -1,12 +1,6 @@
 #!/usr/local/bin/python3.5 -u
 import sys
-print("Enter a number: ",end="")
-a = int(sys.stdin.readline())
-if (a < 0):
-	print("negative") 
-elif (a == 0):
-	print("zero") 
-elif (a < 10):
-	print("small") 
-else:
-	print("large") 
+# writen by andrewt@cse.unsw.edu.au as a COMP2041 example
+# implementation of /bin/echo
+
+print( (' ').join(sys.argv[1:]) )
