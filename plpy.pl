@@ -360,13 +360,11 @@ while (@x1y1z1bg1)
 if ( $assignmentvar ne "")
 {$final = $assignmentvar."=".$final;}
 
-return $final
+if ( !defined $final )
+    {return "";}
+else
+    {return $final;}
 }
-
-
-
-
-
 
 
 
@@ -674,7 +672,7 @@ return $transformed;
 
 ##### Main Code starts here... #####
 
-
+my $tmp = "";
 $lineno = 0;
 while ($line = <>) 
 {
@@ -688,13 +686,12 @@ while ($line = <>)
     if (!handle_comment($line))             # Handles Codes with Comments
     {next;}
 
-    my $tmp = handle_arrayprocess($line);             # Handles array manipulations, checks every line
-    if ( $tmp eq $line)
-    {
-    }
+    $tmp = handle_arrayprocess($line);             # Handles array manipulations, checks every line
+    if ( $tmp eq $line || $tmp eq "" )
+    {}
     else
     {
-        push (@pyarray, $tmp);
+        push (@pyarray, $tmp."\n");
         next;
     }
 
