@@ -34,7 +34,11 @@ arr1.append(arr)
 arr2 = ["non sense","fighting"]
 arr1.extend(arr2)
 
-print (arr1[4])
+# var = ['a','b','c','a','d','a','e']
+var = "abcadae"
+print ( ('|').join(var.split('a')) )
+# print (('|').join(var).split('a'))
+
 # arr = ['a','b','c']
 # arr2 = ['e','d','f']
 

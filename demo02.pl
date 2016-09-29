@@ -8,4 +8,8 @@ print scalar @arr;
 
 print "\n", $arr[0];
 
-print shift push (@arr, @arr2) ;
+# print shift push (@arr, @arr2) ;
+
+$str1 = "ascbasdnsadaaadd";
+
+print split /as/ , $str1;

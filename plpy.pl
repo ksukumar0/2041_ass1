@@ -194,9 +194,10 @@ sub handle_pp_mm
 my $poprgx = qr/pop\s*\(?\s*@(\w+)\s*\)?/;
 my $pushrgx = qr/push\s*\(?\s*@?(\w+)\s*,\s*[@\$]?(\w+)\s*\)?/;
 my $shiftrgx = qr/shift\s*\(?@(\w+)/;
-my $joinrgx = qr/join\s*\(\s*(.*?)\s*,\s*(?:(?:\(?\s*@?(\w+)\s*\)?)|\((.*?)\))\s*\)/;
-my $splitrgx = qr/split\s*\(?\s*\/(.*?)\/\s*,\s*[\@\$]?(\w+)\s*,?\,\s*(\d+)\s*\)/;
-my $splitrgxnolimit = qr/split\s*\(?\s*\/(.*?)\/\s*,\s*[\@\$]?(\w+)\s*,?\,?\s*\)/;
+# my $joinrgx = qr/join\s*\(\s*([^(join)]*?)\s*,\s*(?:(?:\(?\s*@?(\w+)\s*\)?)|\((.*?)\))\s*\)/;
+my $joinrgx = qr/join\s*\(\s*([^(join)]*?)\s*,\s*\(?\s*@?(\w+)\s*\)/;
+my $splitrgx = qr/split\s*\(?\s*\/([^(split)]*?)\/\s*,\s*[\@\$](\w+)\s*,?\,\s*(\d+)\s*\)?/;
+my $splitrgxnolimit = qr/split\s*\(?\s*\/([^(split)]*?)\/\s*,\s*[\@\$](\w+)\s*,?\,?\s*\)?/;
 
 sub handle_join
 {
@@ -644,9 +645,9 @@ sub handle_controlstatements
 
 ##### Handle exit statements #####
 
-    if ( $trans =~ /exit\s*(\d+)\s*;\s*:*}?\s*:*$/ )
+    if ( $trans =~ /exit\s*(\d*)\s*;\s*:*}?\s*:*$/ )
     {
-        $trans =~ s/exit\s*(\d+)\s*;\s*:*}?\s*:*$/sys\.exit($1)/;
+        $trans =~ s/exit\s*(\d*)\s*;\s*:*}?\s*:*$/sys\.exit($1)/;
         $import{"import sys\n"} = 1;
         $transformed = 0;
     }
