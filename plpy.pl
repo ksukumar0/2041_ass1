@@ -527,9 +527,12 @@ sub handle_for
         my $arr = $2;
         $string =~ s/foreach/for/;                      # convert Foreach to for
 
-        if ( $arr =~ /\s*(\d+)\s*..\s*(\d+)\s*/)
-        {                                               # Extract range 0..9     
-            my $temp = $2+1;
+        if ( $arr =~ /\s*(\d+)\s*\.\.\s*(.*)\s*/)
+        {    
+            my $temp = $2;               
+            if ( $temp =~ /\d+/)                            # Extract range 0..9     
+            {$temp += 1;}
+
             $arr = "range($1,$temp)";
         }
                                                         # Extract Array information er @ARGV

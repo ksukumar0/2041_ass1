@@ -1,10 +1,12 @@
 #!/usr/local/bin/python3.5 -u
 import sys
-
-while (1):
-	print("Give me cookie") 
-	line = str(sys.stdin.readline())
-	line = line.rstrip()
-	if (line == "cookie"):
-		break
-print("Thank you") 
+print("Enter a number: ",end="")
+a = int(sys.stdin.readline())
+if (a < 0):
+	print("negative") 
+elif (a == 0):
+	print("zero") 
+elif (a < 10):
+	print("small") 
+else:
+	print("large") 
