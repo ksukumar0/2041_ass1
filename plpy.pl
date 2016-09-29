@@ -195,7 +195,8 @@ my $poprgx = qr/pop\s*\(?\s*@(\w+)\s*\)?/;
 my $pushrgx = qr/push\s*\(?\s*@?(\w+)\s*,\s*[@\$]?(\w+)\s*\)?/;
 my $shiftrgx = qr/shift\s*\(?@(\w+)/;
 # my $joinrgx = qr/join\s*\(\s*([^(join)]*?)\s*,\s*(?:(?:\(?\s*@?(\w+)\s*\)?)|\((.*?)\))\s*\)/;
-my $joinrgx = qr/join\s*\(\s*([^(join)]*?)\s*,\s*\(?\s*@?(\w+)\s*\)/;
+# my $joinrgx = qr/join\s*\(\s*([^(join)]*?)\s*,\s*\(?\s*@?(\w+)\s*\)/;
+my $joinrgx = qr/join\s*\(\s*([^(join)]*?)\s*,\s*\(?\s*@?([\w\.\[\]:]+)\s*\)/;
 my $splitrgx = qr/split\s*\(?\s*\/([^(split)]*?)\/\s*,\s*[\@\$](\w+)\s*,?\,\s*(\d+)\s*\)?/;
 my $splitrgxnolimit = qr/split\s*\(?\s*\/([^(split)]*?)\/\s*,\s*[\@\$](\w+)\s*,?\,?\s*\)?/;
 
@@ -369,6 +370,8 @@ else
 
 
 
+##### Transforms $#array to len(array) #####
+
 sub convert_dollar_hash
 {
     my ($trans) =@_;
@@ -384,6 +387,19 @@ sub convert_dollar_hash
         $import{"import sys\n"} = 1;
     }
 return $trans;
+}
+
+
+##### Transforms @ARGV to sys.argv[1:] #####
+sub convert_ARGV
+{
+    my ($trans) =@_;
+    if ($trans =~ /@ARGV/)
+    {
+        $trans =~ s/\@ARGV/sys.argv[1:]/g;
+        $import{"import sys\n"} = 1;
+    }
+return $trans;    
 }
 
 sub handle_variable
@@ -687,12 +703,13 @@ while ($line = <>)
     if (!handle_shebang($line))             # Handle Shebang line and move to the next line
     {next;}
 
-    # print $lineno, " ";
-
     if (!handle_comment($line))             # Handles Codes with Comments
     {next;}
 
-    $tmp = handle_arrayprocess($line);             # Handles array manipulations, checks every line
+    $line = convert_dollar_hash($line);
+    $line = convert_ARGV($line);
+
+    $tmp = handle_arrayprocess($line);      # Handles array manipulations, checks every line
     if ( $tmp eq $line || $tmp eq "" )
     {}
     else
@@ -708,7 +725,7 @@ while ($line = <>)
     {next;}                                 # Handles control statements like while/for/foreach etc...
 
     if (!handle_variable($line))            # Handles variable declarations
-    {next;}    
+    {next;}
 
     if (!handle_chomp($line))               # Handles chomps
     {next;}
