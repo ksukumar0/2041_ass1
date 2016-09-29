@@ -521,7 +521,6 @@ sub handle_for
     {
         $string = convert_dollar_hash($string);
     }
-
     if ($string =~ /$for_regex/ )
     {
         my $ind = $1;
@@ -534,7 +533,7 @@ sub handle_for
             $arr = "range($1,$temp)";
         }
                                                         # Extract Array information er @ARGV
-        if ( $arr =~ /@?([\w\.]+)/)
+        elsif ( $arr =~ /@?([\w\.]+)/)
         {
             $arr = $1;
             if( $arr eq "sys\.argv")
