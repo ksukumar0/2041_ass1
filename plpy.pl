@@ -297,17 +297,17 @@ sub handle_arrayprocess
     my ($a) = @_;
     $assignmentvar = "";
 
-##### getting the assignment variable if any #####
-
-    if ($a =~ /\$(\w+)\s*=/ )
-    {
-        $assignmentvar = $1;
-    }
-
 ##### Finds all the array manipulation commands used #####
     if ( $a =~ /$cmd/)
     {
         @cmdarr = ($a =~ /$cmd/g);
+
+        ##### getting the assignment variable if any #####
+
+        if ($a =~ /\$(\w+)\s*=/ )
+        {
+            $assignmentvar = $1;
+        }
     }
 
     foreach $i (reverse @cmdarr)
