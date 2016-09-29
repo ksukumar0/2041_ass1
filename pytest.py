@@ -22,15 +22,29 @@ a = [1,2,3]
 a = a[1:]
 a.append(1)
 b = sys.argv[1:]
-arr = "abcbdbebfgh"
-arr = arr.split ('b')
-print(arr)
+# arr = "abcbdbebfgh"
+arr = [];
+arr1 = ["karthik","is here",1,2];
+# arr = arr.split ('b')
+str1 = "abcbdbebfgh"
 
-arr = ['a','b','c']
-arr2 = ['e','d','f']
-# print ("|".join(arr))
-# arr = arr[2:]
-arr.extend(arr2)
+arr = ('|').join(str1.split('b',2))
+arr1.append(arr)
 
-print (arr.pop())
-print (arr)
+arr2 = ["non sense","fighting"]
+arr1.extend(arr2)
+
+print (arr1[4])
+# arr = ['a','b','c']
+# arr2 = ['e','d','f']
+
+# print (arr.extend(arr2))
+
+# arr.extend(arr2)
+# print (arr)
+
+# print (arr.pop())
+
+# arr = arr[1:]
+
+# print (arr)

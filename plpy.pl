@@ -191,6 +191,93 @@ sub handle_pp_mm
     return ($transformed, $trans);
 }
 
+my $poprgx = qr/pop\s*\(?\s*@(\w+)\s*\)?/;
+my $pushrgx = qr/push\s*\(?\s*@?(\w+)\s*,\s*[@\$]?(\w+)\s*\)?/;
+my $shiftrgx = qr/shift\s*\(?@(\w+)/;
+my $joinrgx = qr/join\s*\(\s*(.*?)\s*,\s*(?:(?:\(?\s*@?(\w+)\s*\)?)|\((.*?)\))\s*\)/;
+my $splitrgx = qr/split\s*\(?\s*\/(.*?)\/\s*,\s*[\@\$]?(\w+)\s*,?\,\s*(\d+)\s*\)/;
+my $splitrgxnolimit = qr/split\s*\(?\s*\/(.*?)\/\s*,\s*[\@\$]?(\w+)\s*,?\,?\s*\)/;
+
+sub handle_join
+{
+    my ($trans) = @_;
+    my $transformed = 1;
+
+##### Transforming $str = join('blah',@arr) -> str = arr.join('blah') #####
+
+    if ($trans =~ /$joinrgx/)
+    {
+        if (defined $3)
+        {
+            $trans =~ s/$joinrgx/\($1\)\.join\($3\)/g;
+            $trans = "\($1\)\.join\($3\)";
+        }
+        else
+        {
+            $trans =~ s/$joinrgx/\($1\)\.join\($2\)/g;
+            $trans = "\($1\)\.join\($2\)";
+        }
+    }
+
+return $trans;
+}
+
+sub handle_split
+{
+    my ($trans) = @_;
+
+    ##### Transforming $str = split (/pat/ , exp, limit ) into exp.split('pat',limit) #####
+    if ( $trans =~ /$splitrgx/)
+    {
+        my $temp = $3-1;
+        # $trans =~ s/$splitrgx/$2\.split\(\'$1\',$temp\)/g;
+        $trans = "$2\.split\(\'$1\',$temp\)";
+    }
+
+    if ( $trans =~ /$splitrgxnolimit/)
+    {
+        # $trans =~ s/$splitrgxnolimit/$2\.split\(\'$1\'\)/g;
+        $trans = "$2\.split\(\'$1\'\)";
+    }
+return $trans;
+}
+
+sub handle_pop
+{
+    my ($trans) = @_;
+    if ( $trans =~ /$poprgx/)
+    {
+        $trans =~ s/$poprgx/$1\.pop\(\)/g;
+
+        $trans = "$1\.pop\(\)";
+    }
+    return ($trans);
+}
+
+sub handle_push
+{
+    my ($trans) = @_;
+    if ( $trans =~ /$pushrgx/g)
+    {
+        $trans =~ s/$pushrgx/$1\.extend\($2\)/g;
+
+        $trans = "$1\.extend\($2\)";
+    }
+    return $trans;
+}
+
+sub handle_shift
+{
+    my ($trans) = @_;
+
+    if ( $trans =~ /$shiftrgx/g)
+    {
+        $trans = "$1\[0\]\n";
+        $trans .= "$1 = $1\[1\:\]"
+    }
+    return $trans;
+}
+
 my %arraymanipulatecmds = (
     "1" => "join",
     "2" => "split",
@@ -200,97 +287,90 @@ my %arraymanipulatecmds = (
     "6" => "unshift",
     );
 
-sub handle_join
+my $i;
+my @cmdarr;
+my $cmd = join ('|', values (%arraymanipulatecmds));
+my @x1y1z1bg1;
+
+sub handle_arrayprocess
 {
-    my ($trans) = @_;
-    my $transformed = 1;
+    my ($a) = @_;
+    $assignmentvar = "";
 
-    my $joinrgx = qr/join\s*\(\s*(.*?)\s*,\s*(?:(?:\(?\s*@?(\w+)\s*\)?)|\((.*?)\))\s*\)/;
+##### getting the assignment variable if any #####
 
-##### Transforming $str = join('blah',@arr) -> str = arr.join('blah') #####
-
-    if ($trans =~ /$joinrgx/)
+    if ($a =~ /\$(\w+)\s*=/ )
     {
-        if (defined $3)
+        $assignmentvar = $1;
+    }
+
+##### Finds all the array manipulation commands used #####
+    if ( $a =~ /$cmd/)
+    {
+        @cmdarr = ($a =~ /$cmd/g);
+    }
+
+    foreach $i (reverse @cmdarr)
+    {
+        if ( $i eq "pop")
         {
-            $trans =~ s/$joinrgx/\($1\)\.join\($3\)/g;
-            $transformed = 0;
+            push @x1y1z1bg1, handle_pop($a);
+
+            $glob = '@x1y1z1bg1';
+            $a =~ s/$poprgx/$glob/;
         }
-        else
+        elsif ( $i eq "push" )
         {
-            $trans =~ s/$joinrgx/\($1\)\.join\($2\)/g;
-            $transformed = 0;
+            push @x1y1z1bg1, handle_push($a);
+
+            $glob = '@x1y1z1bg1';
+            $a =~ s/$pushrgx/$glob/;    
         }
+        elsif ( $i eq "join")
+        {
+            push @x1y1z1bg1, handle_join($a);
+
+            $glob = '@x1y1z1bg1';
+            $a =~ s/$joinrgx/$glob/;
+        }
+        elsif ( $i eq "split")
+        {
+            push @x1y1z1bg1, handle_split($a);
+
+            $glob = '@x1y1z1bg1';
+            $a =~ s/($splitrgx|$splitrgxnolimit)/$glob/;
+        }
+        elsif ( $i eq "shift")
+        {
+            push @x1y1z1bg1, handle_shift($a);
+
+            $glob = '@x1y1z1bg1';
+            $a =~ s/$shiftrgx/$glob/;
+        }
+        # print $a,"\n";
     }
+my $final = $x1y1z1bg1[0];
 
-return ($transformed, $trans);
-}
-
-sub handle_split
+while (@x1y1z1bg1)
 {
-    my ($trans) = @_;
-    my $transformed = 1;
+    my $temp =  shift (@x1y1z1bg1);
+    $temp =~ s/x1y1z1bg1/$final/;
+    $final = $temp;
+}
+if ( $assignmentvar ne "")
+{$final = $assignmentvar."=".$final;}
 
-    my $splitrgx = qr/split\s*\(?\s*\/(.*?)\/\s*,\s*@?(\w+)\s*,?\,\s*(\d+)\)/;
-    my $splitrgxnolimit = qr/split\s*\(?\s*\/(.*?)\/\s*,\s*@?(\w+)\s*,?\,?\s*\)/;
-
-    ##### Transforming $str = split (/pat/ , exp, limit ) into exp.split('pat',limit) #####
- 
-    if ( $trans =~ /$splitrgx/g)
-    {
-        my $temp = $3-1;
-        $trans =~ s/$splitrgx/$2\.split\(\'$1\',$temp\)/g;
-        $transformed = 0;
-    }
-    if ( $trans =~ /$splitrgxnolimit/g)
-    {
-        $trans =~ s/$splitrgxnolimit/$2\.split\(\'$1\'\)/g;
-        $transformed = 0;
-    }
-return ($transformed, $trans);  
+return $final
 }
 
-sub handle_push
-{
-    my ($trans) = @_;
-    my $transformed = 1;
-    my $pushrgx = qr/push\s*\(?\s*@?(\w+)\s*,\s*[@\$]?(\w+)\s*\)/;
 
-    if ( $trans =~ /$pushrgx/g)
-    {
-        $trans =~ s/$pushrgx/$1\.extend\($2\)/g;
-        $transformed = 0;
-    }
-    return ($transformed,$trans);
-}
 
-sub handle_pop
-{
-    my ($trans) = @_;
-    my $transformed = 1;
-    my $poprgx = qr/pop\s*\(?\s*@?(\w+)\s*\)?/;
 
-    if ( $trans =~ /$poprgx/g)
-    {
-        $trans =~ s/$poprgx/$1\.pop\(\)/g;
-        $transformed = 0;
-    }
-    return ($transformed,$trans);
-}
 
-sub handle_shift
-{
-    my ($trans) = @_;
-    my $transformed = 1;
-    my $poprgx = qr//;
 
-    if ( $trans =~ /./g)
-    {
-        $trans =~ s///g;
-        $transformed = 0;
-    }
-    return ($transformed,$trans);
-}
+
+
+
 
 sub convert_dollar_hash
 {
@@ -326,7 +406,7 @@ sub handle_variable
     ($t1, $trans) = handle_pp_mm($trans);
 ##### Handle join a string #####
     # ($t2, $trans) = handle_join($trans);
-    ($t2, $trans) = handle_push($trans);
+    # ($t2, $trans) = handle_push($trans);
 
     if ( $trans =~ /STDIN/)
     {
@@ -608,6 +688,16 @@ while ($line = <>)
     if (!handle_comment($line))             # Handles Codes with Comments
     {next;}
 
+    my $tmp = handle_arrayprocess($line);             # Handles array manipulations, checks every line
+    if ( $tmp eq $line)
+    {
+    }
+    else
+    {
+        push (@pyarray, $tmp);
+        next;
+    }
+
     if (!handle_print($line))               # Handles prints
     {next;}
 
@@ -619,9 +709,6 @@ while ($line = <>)
 
     if (!handle_chomp($line))               # Handles chomps
     {next;}
-
-    # if (!handle_arrayprocess($line))        # Handles variable declarations
-    # {next;}
 
     push (@pyarray , "#".$line."\n");   # else comment the code and print it out
 }
