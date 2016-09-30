@@ -175,8 +175,9 @@ sub handle_print
     {
         # print "TRY 3";
         $variable_print = "print\(\"$1\"\) ";
-        @variables = $trans =~ /\$(\w*\b)/g;
-
+        @variables = $trans =~ /(?:\$(\w+)\[\$([^[\[\]]+)\])|(?:\$(\w+))/g;
+        # @arrayvariables = $trans =~ /s/;
+        # print $trans;
         if ($variable_print =~ /$variable_in_print_regex/)
         {
             # print "TRY 4";
@@ -691,8 +692,6 @@ sub handle_stdin
         if ($2 eq "STDIN")
         {
             $import{"import sys\n"}=1;
-            # $trans = ()
-            # print $1," ",$2;
             $trans = "for $1 in sys.stdin:"
         }
         elsif ($2 eq "")
@@ -820,6 +819,17 @@ while ($line = <>)
 {
     $lineno++;
     chomp $line;
+    @var = $line =~ /\$(\w+)/g;    # Extracting variable names
+    foreach $i (@var)               # this loop determines the variable type and places them in a hash
+    {
+        if ($line =~ /$i.+\./)
+            {$vartype{$i} = '%f';}  # Float
+        elsif ($line =~ /(?:$i.+\".*\")|($i.+\w+)/)
+            {$vartype{$i} = '%s';}  # String
+        else
+            {$vartype{$i} = '%d';}  # Default Integer
+        }
+
     if (!handle_shebang($line))             # Handle Shebang line and move to the next line
     {next;}
 
@@ -881,7 +891,6 @@ foreach $i (@pyarray)
     {
         if( $i =~ /$stdvar\s*(?:$allarithops)/)
         {
-            # print $i,$stdvar,"FOUND\n";
             if ( $i =~ /$stdvar\s*($allarithops)\s*\d+\.\d+/)
             {
                 $stdinvariables{$stdvar} = "float";

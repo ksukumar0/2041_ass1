@@ -1,9 +1,12 @@
 #!/usr/local/bin/python3.5 -u
 import sys
-import fileinput
-import re
-
-for line in fileinput.input():
-	line = line.rstrip()
-	line = re.sub("[aeiou]","",line)
-	print("%s" %line )
+print("Enter a number: ",end="")
+a = int(sys.stdin.readline())
+if (a < 0):
+	print("negative") 
+elif (a == 0):
+	print("zero") 
+elif (a < 10):
+	print("small") 
+else:
+	print("large") 
