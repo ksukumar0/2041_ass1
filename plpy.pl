@@ -175,7 +175,8 @@ sub handle_print
     {
         # print "TRY 3";
         $variable_print = "print\(\"$1\"\) ";
-        @variables = $trans =~ /(?:\$(\w+)\[\$([^[\[\]]+)\])|(?:\$(\w+))/g;
+        @variables = $trans =~ /\$(\w*\b)/g;
+        # @variables = $trans =~ /(?:\$(\w+)\[\$([^[\[\]]+)\])|(?:\$(\w+))/g;
         # @arrayvariables = $trans =~ /s/;
         # print $trans;
         if ($variable_print =~ /$variable_in_print_regex/)
