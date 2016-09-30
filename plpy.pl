@@ -36,6 +36,7 @@ my $joinrgx = qr/join\s*\(\s*([^(join)]*?)\s*,\s*\(?\s*@?([\w\.\[\]:]+)\s*\)/;
 my $splitrgx = qr/split\s*\(?\s*\/([^(split)]*?)\/\s*,\s*[\@\$](\w+)\s*,?\,\s*(\d+)\s*\)?/;
 my $splitrgxnolimit = qr/split\s*\(?\s*\/([^(split)]*?)\/\s*,\s*[\@\$](\w+)\s*,?\,?\s*\)?/;
 my $reversergx = qr/reverse\s*@?([\w.:\[\]]+)/;
+my $subrgx = '(\w+)\s*=~\s*s\/([^/]*)\/([^/]*)\/(\w*)';
 
 my %arraymanipulatecmds = (
     "1" => "join",
@@ -369,6 +370,18 @@ sub handle_reverse
     return $trans;   
 }
 
+sub handle_sub
+{
+    my ($trans) = @_;
+
+    if ( $trans =~ /$subrgx/)
+    {
+         $trans =~ s/$subrgx/$1 = re\.sub\(\"$2\",\"$3\",$1\)/;
+         $import{"import re\n"} = 1;
+    }
+    return $trans;  
+}
+
 sub handle_arrayprocess
 {
     my ($a) = @_;
@@ -430,6 +443,13 @@ sub handle_arrayprocess
             $glob = '@x1y1z1bg1';
             $a =~ s/$reversergx/$glob/;  
         }
+        # elsif ($i eq "=~ s")
+        # {
+        #     push @x1y1z1bg1, handle_sub($a);
+
+        #     $glob = '@x1y1z1bg1';
+        #     $a =~ s/$subrgx/$glob/;  
+        # }
     }
 my $final = $x1y1z1bg1[0];
 
@@ -521,12 +541,12 @@ sub handle_variable
     {
         @var = $trans =~ /\$(\w+)/g;    # Extracting variable names
         $trans =~ s/(\$)(.*?)/$2/g;     # replacing $var with var
-
+# print $trans;
         foreach $i (@var)               # this loop determines the variable type and places them in a hash
         {
             if ($trans =~ /$i.+\./)
                 {$vartype{$i} = '%f';}  # Float
-            elsif ($trans =~ /$i.+\".*\"/)
+            elsif ($trans =~ /(?:$i.+\".*\")|($i.+\w+)/)
                 {$vartype{$i} = '%s';}  # String
             else
                 {$vartype{$i} = '%d';}  # Default Integer
@@ -543,6 +563,12 @@ sub handle_variable
         $trans =~ s/(@\s*)(\w+)/$2/g;
         $trans =~ s/\s*ARGV/sys\.argv\[1:\]/g;
         $t4 = 0;
+    }
+
+    if ( $trans =~ /$subrgx/)
+    {
+        $trans = handle_sub($trans);
+        $t2 = 0;
     }
 
     $transformed = $t1 & $t2 & $t3 & $t4 & $t5 & $t6;

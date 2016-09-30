@@ -1,6 +1,9 @@
 #!/usr/local/bin/python3.5 -u
 import sys
-# writen by andrewt@cse.unsw.edu.au as a COMP2041 example
-# implementation of /bin/echo
+import fileinput
+import re
 
-print( (' ').join(sys.argv[1:]) )
+for line in fileinput.input():
+	line = line.rstrip()
+	line = re.sub("[aeiou]","",line)
+	print("%s" %line )
