@@ -500,6 +500,7 @@ sub handle_variable
 ##### Handle i++s and i--s in the expression #####
     ($t1, $trans) = handle_pp_mm($trans);
 
+##### Handle STDIN in the expression #####
     if ( $trans =~ /STDIN/)
     {
         $trans = handle_stdin($trans);  # If <STDIN> is found changes it to sys.readline()
@@ -657,10 +658,9 @@ return $string;
 sub handle_stdin
 {
     my ($trans) = @_;
-    # print $trans;
 
 ##### if of the form while ( $line = <STDIN|FH> ) #####
-    if ($trans =~ /while\s*\(\s*(\w*?)\s*[=]?\s*<\s*(\w+)\s*>\s*\)/)
+    if ($trans =~ /while\s*\(\s*(\w*?)\s*[=]?\s*<\s*(\w*)\s*>\s*\)/)
     {
         if ($2 eq "STDIN")
         {
@@ -669,9 +669,11 @@ sub handle_stdin
             # print $1," ",$2;
             $trans = "for $1 in sys.stdin:"
         }
-        else
+        elsif ($2 eq "")
         {
             # Handle other files
+            $import{"import fileinput\n"} = 1;
+            $trans = "for $1 in fileinput\.input\(\):"
         }
     }
 ##### if of the form while ( $line = <STDIN|FH> ) #####
@@ -719,6 +721,12 @@ sub handle_controlstatements
 
         if ($trans =~ /elsif/)
         {$trans =~ s/elsif/elif/g;}
+
+        # ##### Handle while (<>) #####
+        # if ( $trans =~ /while\s*\(\s*$?(\w+)\s*=\s*\<\>\s*\)/ )
+        # {
+        #     $trans =~ s/while\s*\(\s*[$]?(\w+)\s*=\s*<>\s*\)/for $1 in file\.input\(\)\:/;
+        # }
 
         ##### Handle for loops #####
         $trans = handle_for($trans);
