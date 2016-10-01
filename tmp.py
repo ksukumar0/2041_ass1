@@ -1,11 +1,25 @@
 #!/usr/local/bin/python3.5 -u
 import sys
-import fileinput
-# Test script to read lines from files or STDIN
+# put your demo script here
 
-arr=[]
+# print "Enter x: ";
+# $x = <STDIN>;
+# chomp $x;
+# print "Enter y: ";
+# $y = <STDIN>;
+# chomp $y;
+# $pythagoras = sqrt $x * $x + $y * $y;
+# print "The square root of $x squared + $y squared is $pythagoras\n";
 
-for line in fileinput.input():
-	arr.append(line)
+	#     print " $arg";
+	# 
+	
+# print "\n";
 
-print(arr,end="")
+line_count= 0
+while (1):
+	line = str(sys.stdin.readline())
+	if (not line):
+		break
+	line_count+=1
+print("%s lines" %line_count )

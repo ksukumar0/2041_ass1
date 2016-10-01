@@ -20,4 +20,6 @@ print "\n$var x $var2 = $var3\n";
 
 print "$str is how americans say hi\n";
 
-print "$fltnum is the answer to life";
+print "$fltnum is the answer to life\n";
+
+print " $str";

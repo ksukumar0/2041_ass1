@@ -245,13 +245,13 @@ sub handle_print
             if(scalar @variables == 1)
             {
                 # print "TRY 5";
-                $temp = "$variable_print \%@variables \)\n";
+                $temp = "$variable_print \%@variables ,end=\"\"\)\n";
             }
             else
             {
             # print "TRY 6";
                 $r = join (",",@variables);
-                $temp = "$variable_print \%\($r\) \)\n";
+                $temp = "$variable_print \%\($r\),end=\"\"\)\n";
             }
 
             # $temp = "$variable_print \%$tmp,end=\"\"\)\n";
@@ -655,6 +655,7 @@ sub handle_operators
         "ge" => ">=",
         "eq" => "==",
         "ne" => "!=",
+        "not" => "!",
         );
    my ($ctrlstmts) = @_;
    my $j;
@@ -670,6 +671,10 @@ sub handle_operators
         elsif ( $ctrlstmts =~ /\b$j\b/ )
         {
             $ctrlstmts =~ s/$j/$operators{$j}/ge;           # replace by the value
+        }
+        if ( $ctrlstmts =~ /\!\s*\w+/ )
+        {
+            $ctrlstmts =~ s/(\!)\s*/not\ /g;
         }
    }
 return $ctrlstmts;
@@ -936,6 +941,7 @@ while ($line = <>)
     chomp $line;
     $endbracesflag = 0;
 
+    $line =~ s/^\s*{//;                     # Remove opening braces
     ($line, $endbracesflag) = handle_complex_closebrace($line, $endbracesflag);
 
     assignvartypes($line);                  # Determine var types
@@ -1063,7 +1069,7 @@ foreach $i (@pyarray)
         $i =~ s/^/$tabspacing/mg;
 
         if ($i =~ /^.*[{]\s*$/)
-        {}                          # Dont print the '{'
+        {}                              # Dont print the '{'
         else
         {print $i;}
     }
