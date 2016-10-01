@@ -101,7 +101,7 @@ sub handle_print
     if ($trans =~ /$joinrgx/)
     {
         $trans =~ s/$joinrgx/\($1\)\.join\($2\)/g;
-        $trans =~ s/,\s*\"\n\"\s*;$//;
+        $trans =~ s/,\s*\"\\n\"\s*;\s*$//;
         $trans =~ s/print(.*)/print\($1\)/;
         push @pyarray,$trans;
         return 0;
