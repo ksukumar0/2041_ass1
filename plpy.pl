@@ -876,11 +876,40 @@ return $transformed;
 ##### Main Code starts here... #####
 
 my $tmp = "";
-$lineno = 0;
+my $endbracesflag = 0;
+
 while ($line = <>) 
 {
-    $lineno++;
+    if ( $endbracesflag == 1 )
+    {
+        push (@pyarray , "}\n");            # Add } after the last line for complex statements like if ... }
+    }
+
     chomp $line;
+    $endbracesflag = 0;
+
+##### To detect statements with } in the same line #####
+    if ( $line =~ /^.*}\s*$/)
+    {
+        $line =~ s/^\t*\s*//;
+
+        if ( $line =~ /^(.*)}\s*$/ )
+        {
+            if ($1 ne "")
+            {
+                $line = $1."\n";
+                $endbracesflag = 1;
+                # print $1,"\n";
+                # print $line," ", $1,"\n";
+            }
+            else
+            {
+                # $line =~ s/\s*}$/}\n/;
+                $endbracesflag = 0;
+            }
+        }
+    }
+
     my @var;
     @var = $line =~ /\$(\w+)/g;    # Extracting variable names
     foreach $i (@var)               # this loop determines the variable type and places them in a hash
@@ -931,7 +960,7 @@ while ($line = <>)
     if (!handle_chomp($line))               # Handles chomps
     {next;}
 
-    push (@pyarray , "#".$line."\n");   # else comment the code and print it out
+    push (@pyarray , "#".$line."\n");       # else comment the code and print it out
 }
 
 my $endbrace = qr/#*\s*}\s*$/;
@@ -1001,7 +1030,6 @@ push (@firstline, @pyarray);            # add the remaining array on top of the 
 #### Print the python code #####
 foreach $i (@pyarray)
 {
-# print $i;
     if($i =~ /$endbrace/)
     {
         if($pytabindent>0)
@@ -1047,4 +1075,3 @@ foreach $i (@pyarray)
         $pytabindent++;
     }
 }
-# print %vartype;

@@ -1,5 +1,5 @@
 #!/usr/bin/perl -w
-# Test file to show some nested control statements
+# Test file to show some nested control statements with badly formated braces
 
 $i = 0;
 
@@ -13,13 +13,10 @@ print "C way\n";
 for ($i=4; $i < 6 ; $i++)
 {
 	print "$i\n";
-	for ($j=10; $j < 12 ; $j++)
-	{
+	for ($j=10; $j < 12 ; $j++){
 		print "$j\n";
-		if ( $j == 15 )
-		{
-			print "";
-		}
+		if ( $j == 15 ){
+			print "";}
 		else
 		{
 			print "";
