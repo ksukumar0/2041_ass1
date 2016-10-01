@@ -3,13 +3,15 @@
 
 @arr = ( "how are you\n","i am fine\n" );
 @arr2 = (1,2,3);
-
-print scalar @arr;
-
-print "\n", $arr[0];
-
-# print shift push (@arr, @arr2) ;
-
 $str1 = "ascbasdnsadaaadd";
 
-print split /as/ , $str1;
+split ( /as/, $str1);
+# scalar
+# reverse
+# join
+# push
+# pop
+
+@ar1 = join ( 'as', split ( /as/ , join ( 'as', split ( /as/ , $str1) )));
+
+print @ar1,"\n";

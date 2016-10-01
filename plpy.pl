@@ -27,16 +27,21 @@ my @loopexpression;     # Global variable which remembers the expression for the
                         # of the loop when using a C style for loop
 my %vartype;
 
+##### Some help was provided by Matt from this website for using negative lookahead assertions #####
+##### http://www.regextester.com/15 #####
+
 my $poprgx = qr/pop\s*\(?\s*@?([\w:\[\]\.]+)\s*\)?/;
 my $pushrgx = qr/push\s*\(?\s*@?([\w:\[\]\.]+)\s*,\s*[@\$]?([\w:\[\]\.]+)\s*\)?/;
 my $shiftrgx = qr/shift\s*\(?@?([\w:\[\]\.]+)/;
 # my $joinrgx = qr/join\s*\(\s*([^(join)]*?)\s*,\s*(?:(?:\(?\s*@?(\w+)\s*\)?)|\((.*?)\))\s*\)/;
 # my $joinrgx = qr/join\s*\(\s*([^(join)]*?)\s*,\s*\(?\s*@?(\w+)\s*\)/;
-my $joinrgx = qr/join\s*\(\s*([^(join)]*?)\s*,\s*\(?\s*@?([\w\.\[\]:]+)\s*\)/;
-my $splitrgx = qr/split\s*\(?\s*\/([^(split)]*?)\/\s*,\s*[\@\$](\w+)\s*,?\,\s*(\d+)\s*\)?/;
-my $splitrgxnolimit = qr/split\s*\(?\s*\/([^(split)]*?)\/\s*,\s*[\@\$](\w+)\s*,?\,?\s*\)?/;
+my $joinrgx = qr/join\s*\(\s*((?:(?!join).)*)\s*,\s*\(?\s*@?([\w\.\[\]:]+)\s*\)/;
+my $splitrgx = qr/split\s*\(?\s*\/((?:(?!split).)*)\/\s*,\s*[\@\$](\w+)\s*,?\,\s*(\d+)\s*\)?/;
+my $splitrgxnolimit = qr/split\s*\(?\s*\/((?:(?!split).)*)\/\s*,\s*[\@\$](\w+)\s*,?\,?\s*\)?/;
 my $reversergx = qr/reverse\s*@?([\w.:\[\]]+)/;
 my $subrgx = '(\w+)\s*=~\s*s\/([^/]*)\/([^/]*)\/(\w*)';
+my $scalarrgx = qr/scalar\s*\(?\s*\@(\w+)\s*\)?/;
+my $scalarrgx_sys = qr/scalar\s*\(?\s*(sys\.argv\[1\:\])\s*\)?/;
 
 my %arraymanipulatecmds = (
     "1" => "join",
@@ -46,6 +51,7 @@ my %arraymanipulatecmds = (
     "5" => "shift",
     "6" => "unshift",
     "7" => "reverse",
+    "8" => "scalar",
     );
 
 my $i;
@@ -84,6 +90,7 @@ sub handle_print
     my $variable_print;
     my $tmp;
     my $variable_in_print_regex = qr/\$(\w*\b)/;
+    my $substitute_dollar_at = qr/([\$\@])(\w*\b)/;
     my $r;
     my $loc;
 
@@ -103,8 +110,7 @@ sub handle_print
         my $temp = $3-1;
         $trans =~ s/$splitrgx/$2\.split\(\'$1\',$temp\)/g;
     }
-
-    if ( $trans =~ /$splitrgxnolimit/)
+    elsif ( $trans =~ /$splitrgxnolimit/)
     {
         $trans =~ s/$splitrgxnolimit/$2\.split\(\'$1\'\)/g;
     }
@@ -144,6 +150,16 @@ sub handle_print
         $trans =~ s/$reversergx/$1\.reverse\(\)/g;
     }
 
+##### Scalar #####
+
+    if ( $trans =~ /($scalarrgx|$scalarrgx_sys)/ )
+    {
+        $trans = handle_scalar($trans);
+    }
+
+
+
+
 ##### print simple variables if the line only has variables without newline #####
     if ($trans =~ /$print_only_var_without_nl_regex/)
     {
@@ -151,7 +167,7 @@ sub handle_print
         my $temp;
         $variable_print = $1;
         # @variables = $trans =~ /\$(\w*\b)/g;      
-        $variable_print =~ s/(\$)(\w*\b)/$2/g;
+        $variable_print =~ s/$substitute_dollar_at/$2/g;
         $variable_print =~ s/[;\s]*$//g;
         $temp = "print\($variable_print,end=\"\"\)\n";
 
@@ -163,7 +179,7 @@ sub handle_print
     {
         # print "TRY 2";
         $variable_print = $1;
-        $variable_print =~ s/(\$)(\w*\b)/$2/g;
+        $variable_print =~ s/$substitute_dollar_at/$2/g;
         $variable_print =~ s/[;\s]*$//g;
 
         $temp = "print\( $variable_print \)\n";
@@ -311,7 +327,7 @@ sub handle_split
         $trans = "$2\.split\(\'$1\',$temp\)";
     }
 
-    if ( $trans =~ /$splitrgxnolimit/)
+    elsif ( $trans =~ /$splitrgxnolimit/)
     {
         # $trans =~ s/$splitrgxnolimit/$2\.split\(\'$1\'\)/g;
         $trans = "$2\.split\(\'$1\'\)";
@@ -384,6 +400,21 @@ sub handle_sub
     return $trans;  
 }
 
+sub handle_scalar
+{
+   my ($trans) = @_;
+
+    if ( $trans =~ /$scalarrgx/)
+    {
+        $trans =~ s/$scalarrgx/len($1)/g;
+    }
+    elsif ( $trans =~ /$scalarrgx_sys/)
+    {
+        $trans =~ s/$scalarrgx_sys/len(sys\.argv\[1\:\])/g;   
+    }
+    return $trans;  
+}
+
 sub handle_arrayprocess
 {
     my ($a) = @_;
@@ -394,7 +425,7 @@ sub handle_arrayprocess
     {
         @cmdarr = ($a =~ /$cmd/g);
         ##### getting the assignment variable if any #####
-        if ($a =~ /\$(\w+)\s*=/ )
+        if ($a =~ /[\$\@](\w+)\s*=/ )
         {
             $assignmentvar = $1;
         }
@@ -445,13 +476,13 @@ sub handle_arrayprocess
             $glob = '@x1y1z1bg1';
             $a =~ s/$reversergx/$glob/;  
         }
-        # elsif ($i eq "=~ s")
-        # {
-        #     push @x1y1z1bg1, handle_sub($a);
+        elsif ( $i eq "scalar")
+        {
+            push @x1y1z1bg1, handle_scalar($a);
 
-        #     $glob = '@x1y1z1bg1';
-        #     $a =~ s/$subrgx/$glob/;  
-        # }
+            $glob = '@x1y1z1bg1';
+            $a =~ s/($scalarrgx|$scalarrgx_sys)/$glob/;
+        }
     }
 my $final = $x1y1z1bg1[0];
 
