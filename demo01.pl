@@ -1,46 +1,21 @@
 #!/usr/bin/perl -w
 # Test file to show some control statements
 
-$i = 0;
+@input_text_array = <>;
+$input_text_array = join ("", @input_text_array);
+$total = 0;
 
-if ( $i == 0)
-{
-	print "";
-}
+@numbers = split(/\D+/, $input_text_array);
+print join(",", @numbers);
 
-print "C way\n";
-
-for ($i=4; $i < 10 ; $i++)
-{
-	print "$i\n";
-	for ($j=10; $j < 12 ; $j++)
-	{
-		print "$j\n";
-		if ( $j == 15 )
-		{
-			print "";
-		}
-		else
-		{
-			print "";
-		}
+foreach $number (@numbers) {
+	if ($number ne '') {
+		$total += $number;
+		$n++;
 	}
 }
 
-print "Perl way\n";
-
-for $i (4..9)
-{
-	print "$i\n";
-}
-
-print "C way the 2nd TIME\n";
-
-for ($i=4; $i < 10 ; $i++)
-{
-	print "$i\n";
-	for ($j=10; $j < 12 ; $j++)
-	{
-		print "$j\n";
-	}
+if (@numbers) {
+	$a = $total/$n
+	print "$n numbers: total $total mean is $a";
 }

@@ -34,8 +34,8 @@ my $poprgx = qr/pop\s*\(?\s*@?([\w:\[\]\.]+)\s*\)?/;
 my $pushrgx = qr/push\s*\(?\s*@?([\w:\[\]\.]+)\s*,\s*[@\$]?([\w:\[\]\.]+)\s*\)?/;
 my $shiftrgx = qr/shift\s*\(?@?([\w:\[\]\.]+)/;
 # my $joinrgx = qr/join\s*\(\s*([^(join)]*?)\s*,\s*(?:(?:\(?\s*@?(\w+)\s*\)?)|\((.*?)\))\s*\)/;
-# my $joinrgx = qr/join\s*\(\s*([^(join)]*?)\s*,\s*\(?\s*@?(\w+)\s*\)/;
-my $joinrgx = qr/join\s*\(\s*((?:(?!join).)*)\s*,\s*\(?\s*@?([\w\.\[\]:]+)\s*\)/;
+my $joinrgx = qr/join\s*\(\s*([^(join)]*?)\s*,\s*\(?\s*@?(\w+)\s*\)/;
+# my $joinrgx = qr/join\s*\(\s*((?:(?!join).)*)\s*,\s*\(?\s*@?([\w\.\[\]:]+)\s*\)/;
 my $splitrgx = qr/split\s*\(?\s*\/((?:(?!split).)*)\/\s*,\s*[\@\$](\w+)\s*,?\,\s*(\d+)\s*\)?/;
 my $splitrgxnolimit = qr/split\s*\(?\s*\/((?:(?!split).)*)\/\s*,\s*[\@\$](\w+)\s*,?\,?\s*\)?/;
 my $reversergx = qr/reverse\s*@?([\w.:\[\]]+)/;
@@ -101,6 +101,10 @@ sub handle_print
     if ($trans =~ /$joinrgx/)
     {
         $trans =~ s/$joinrgx/\($1\)\.join\($2\)/g;
+        $trans =~ s/[\s*;]*$//;
+        $trans =~ s/print(.*)/print\($1\)/;
+        push @pyarray,$trans;
+        return 0;
     }
 
 ##### Split #####
@@ -136,7 +140,7 @@ sub handle_print
     if ( $trans =~ /$pushrgx/)
     {
         $trans =~ s/$pushrgx/$1\.append\($2\)/g;
-    }
+   }
 
 ##### POP #####
     if ( $trans =~ /$poprgx/)
@@ -157,9 +161,6 @@ sub handle_print
         $trans = handle_scalar($trans);
     }
 
-
-
-
 ##### print simple variables if the line only has variables without newline #####
     if ($trans =~ /$print_only_var_without_nl_regex/)
     {
@@ -178,6 +179,7 @@ sub handle_print
     elsif ($trans =~ /$print_only_var_regex/)
     {
         # print "TRY 2";
+
         $variable_print = $1;
         $variable_print =~ s/$substitute_dollar_at/$2/g;
         $variable_print =~ s/[;\s]*$//g;
@@ -186,6 +188,7 @@ sub handle_print
         push (@pyarray,$temp);
         return 0;
     }
+
 ##### print plain strings below which have a newline in them #####
     if ($trans =~ /$print_regex/)
     {
@@ -554,7 +557,7 @@ sub handle_variable
     ($t1, $trans) = handle_pp_mm($trans);
 
 ##### Handle STDIN in the expression #####
-    if ( $trans =~ /STDIN/)
+    if ( $trans =~ /STDIN|(<>)/)
     {
         $trans = handle_stdin($trans);  # If <STDIN> is found changes it to sys.readline()
         $t5 = 0;
@@ -769,12 +772,17 @@ sub handle_stdin
         }
     }
 ##### if of the form while ( $line = <STDIN|FH> ) #####
-    elsif ( $trans =~ /(\w+)\s*=\s*<\s*(\w+)\s*>/ )
+    elsif ( $trans =~ /(\w+)\s*=\s*<\s*(\w*)\s*>/ )
     {
         if( $2 eq "STDIN")
         {
             $import{"import sys\n"}=1;
             $trans = "$1 = sys.stdin.readline\(\)";
+        }
+        elsif ( $2 eq "")
+        {
+            $import{"import fileinput\n"} = 1;
+            $trans = "$1 = fileinput.input\(\)";
         }
     }
 return $trans;

@@ -1,25 +1,20 @@
 #!/usr/local/bin/python3.5 -u
 import sys
-# put your demo script here
+import fileinput
+# Test file to show some control statements
 
-# print "Enter x: ";
-# $x = <STDIN>;
-# chomp $x;
-# print "Enter y: ";
-# $y = <STDIN>;
-# chomp $y;
-# $pythagoras = sqrt $x * $x + $y * $y;
-# print "The square root of $x squared + $y squared is $pythagoras\n";
+input_text_array = fileinput.input()
+input_text_array=("").join(input_text_array)
+total= 0
 
-	#     print " $arg";
-	# 
-	
-# print "\n";
+numbers= input_text_array.split('\D+')
+print ((",").join(numbers))
 
-line_count= 0
-while (1):
-	line = str(sys.stdin.readline())
-	if (not line):
-		break
-	line_count+=1
-print("%s lines" %line_count )
+for number in numbers :
+	if (number != ''):
+		total += number
+		n+=1
+
+if (numbers):
+	a= total/n
+	print("%s numbers: total %s mean is %s" %(n,total,a),end="")
