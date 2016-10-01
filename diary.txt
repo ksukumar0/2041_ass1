@@ -1,3 +1,28 @@
+Karthik Sukumar	Sat Oct 1 10:33:19 2016 +1000	Made the split and join regexes more robust
+Karthik Sukumar	Fri Sep 30 23:29:12 2016 +1000	Print statement reverted
+Karthik Sukumar	Fri Sep 30 23:27:09 2016 +1000	[Bug Fix] fixed the variable type interpolation issue
+Karthik Sukumar	Fri Sep 30 21:54:49 2016 +1000	[Feature]: handles simple substitutions
+Karthik Sukumar	Fri Sep 30 20:56:25 2016 +1000	[Feature] Handles while (  = <> )
+Karthik Sukumar	Thu Sep 29 22:58:45 2016 +1000	added reverse,push,pop, shift, split and join funcitons in print
+Karthik Sukumar	Thu Sep 29 22:15:09 2016 +1000	added Support for join in print statements
+Karthik Sukumar	Thu Sep 29 21:47:06 2016 +1000	[Bug Fix] range in for loop
+Karthik Sukumar	Thu Sep 29 21:45:27 2016 +1000	[Bug Fix] len(sys.argv) in for loop bug fixed
+Karthik Sukumar	Thu Sep 29 21:28:54 2016 +1000	[Bug Fix] again minor thing
+Karthik Sukumar	Thu Sep 29 21:24:20 2016 +1000	[Bug Fix] debug print statement left in there removed
+Karthik Sukumar	Thu Sep 29 21:23:08 2016 +1000	[Bug Fix] in printing out of string with ARGV
+Karthik Sukumar	Thu Sep 29 20:55:04 2016 +1000	Added support for shift @ARGV
+Karthik Sukumar	Thu Sep 29 15:20:52 2016 +1000	[Improvement] Handles nested array manipulations very well
+Karthik Sukumar	Thu Sep 29 14:59:18 2016 +1000	[minor Bug Fix] improvement in the regex handling capabilty
+Karthik Sukumar	Thu Sep 29 13:53:10 2016 +1000	[Feature]: Successfully converts exit to sys.exit()
+Karthik Sukumar	Thu Sep 29 12:03:13 2016 +1000	[Bug Fix]: minor initialisation of the variable error
+Karthik Sukumar	Thu Sep 29 11:58:28 2016 +1000	[Bug Fix] Small fix in warnings being printed
+Karthik Sukumar	Thu Sep 29 11:52:03 2016 +1000	[MAJOR FEATURE]: Handles nested array manipulation statements but needs improvement
+Karthik Sukumar	Thu Sep 29 09:08:41 2016 +1000	perlcode3.pl added to test new algorithm for nested array manipulation statments and it works, need to implement it in the final design
+Karthik Sukumar	Wed Sep 28 22:52:49 2016 +1000	Seperated functions for push,pop,shift,unshift, join and split yet to tie them together
+Karthik Sukumar	Wed Sep 28 22:05:45 2016 +1000	Join and Split working
+Karthik Sukumar	Wed Sep 28 17:09:53 2016 +1000	[Bug Fix] minor bug fix in the 0ARGV conversion
+Karthik Sukumar	Wed Sep 28 16:49:14 2016 +1000	Completed type casting for stdin
+Karthik Sukumar	Wed Sep 28 14:32:33 2016 +1000	Almost done with the type casting implementation
 Karthik Sukumar	Wed Sep 28 14:02:56 2016 +1000	Working on typecasting STDIN
 Karthik Sukumar	Wed Sep 28 09:09:02 2016 +1000	Added support for casting input but needs more work, this is the plan for today
 Karthik Sukumar	Mon Sep 26 22:13:06 2016 +1000	Added join functionality

@@ -11,7 +11,7 @@
 # $commentline_regex = qr/(.*)([^"']*#[^"']*)/;
 
 $comment_regex = qr/(?:(^\s*#.*)|(^\s*$))/;
-$print_regex = qr/^\s*print\s*"(.*)\\n"[\s;]*$/i;
+$print_regex = qr/^\s*print\s*\"(.*)\\n\"[\s;]*$/i;
 $print_without_nl_regex = qr/^\s*print\s*"(.*)"[\s;]*$/i;
 
 $print_only_var_without_nl_regex = qr/^\s*print\s*([^"]*)[\s;]*$/i;
@@ -135,7 +135,7 @@ sub handle_print
 
     if ( $trans =~ /$pushrgx/)
     {
-        $trans =~ s/$pushrgx/$1\.extend\($2\)/g;
+        $trans =~ s/$pushrgx/$1\.append\($2\)/g;
     }
 
 ##### POP #####
@@ -174,7 +174,7 @@ sub handle_print
         push (@pyarray,$temp);
         return 0;
     }
-##### print simple variables if the line only has variables without newline #####
+##### print simple variables if the line only has variables with newline #####
     elsif ($trans =~ /$print_only_var_regex/)
     {
         # print "TRY 2";
@@ -351,8 +351,8 @@ sub handle_push
     my ($trans) = @_;
     if ( $trans =~ /$pushrgx/g)
     {
-        $trans =~ s/$pushrgx/$1\.extend\($2\)/g;
-        $trans = "$1\.extend\($2\)";
+        $trans =~ s/$pushrgx/$1\.append\($2\)/g;
+        $trans = "$1\.append\($2\)";
     }
     return $trans;
 }
@@ -569,12 +569,39 @@ sub handle_variable
     }
 
 ##### converting $variable to variable and assigning type to the variable using a hash $vartype #####
+    
+    my @arrs;
+    my $myvarinitrgx = qr/(?:my)?\s*\$(\w+)\s*=(.*)/;
+    my $myarrinitrgx = qr/(?:my)?\s*\@(\w+)\s*(=)?(.*)/;
 
-    if ($trans =~ /^\s*\$(.*)/)
+    if ($trans =~ /^(?:my)?\s*[\$\@](.*)/)
     {
         @var = $trans =~ /\$(\w+)/g;    # Extracting variable names
-        $trans =~ s/(\$)(.*?)/$2/g;     # replacing $var with var
-# print $trans;
+        @arrs = $trans =~ /\@(\w+)/g;   # Extracting array names
+
+##### Replace my $test = "name" with test = "name" #####
+
+        if ($trans =~ /$myvarinitrgx/)
+        {
+            $trans =~ s/$myvarinitrgx/$1=$2/g;
+        }
+        if ($trans =~ /$myarrinitrgx/)
+        {
+            if ( defined $2 )
+            {
+                my $tmp = $3;
+                $tmp =~ tr/()/[]/;
+                $trans =~ s/$myarrinitrgx/$1=$tmp/g;
+            }
+            else
+            {
+                $trans =~ s/$myarrinitrgx/$1=\[\]/g;                
+            }
+
+        }
+
+        $trans =~ s/([\$\@])(.*?)/$2/g; # replacing $var/@arr with var/arr
+
         foreach $i (@var)               # this loop determines the variable type and places them in a hash
         {
             if ($trans =~ /$i.+\./)
@@ -598,6 +625,7 @@ sub handle_variable
         $t4 = 0;
     }
 
+##### Handles substitutions $var =~ s///; #####
     if ( $trans =~ /$subrgx/)
     {
         $trans = handle_sub($trans);
@@ -725,12 +753,14 @@ sub handle_stdin
         {
             $import{"import sys\n"}=1;
             $trans = "for $1 in sys.stdin:"
+            # $vartype{$1} = '%s';          
         }
         elsif ($2 eq "")
         {
             # Handle other files
             $import{"import fileinput\n"} = 1;
-            $trans = "for $1 in fileinput\.input\(\):"
+            $trans = "for $1 in fileinput\.input\(\):";
+            $vartype{$1} = '%s';
         }
     }
 ##### if of the form while ( $line = <STDIN|FH> ) #####
@@ -851,16 +881,25 @@ while ($line = <>)
 {
     $lineno++;
     chomp $line;
+    my @var;
     @var = $line =~ /\$(\w+)/g;    # Extracting variable names
     foreach $i (@var)               # this loop determines the variable type and places them in a hash
     {
         if ($line =~ /$i.+\./)
-            {$vartype{$i} = '%f';}  # Float
+            {$vartype{$i} = '%f';
+        # print $i,"FLOAT","\n";
+            }  # Float
         elsif ($line =~ /(?:$i.+\".*\")|($i.+\w+)/)
-            {$vartype{$i} = '%s';}  # String
-        else
-            {$vartype{$i} = '%d';}  # Default Integer
-        }
+        {
+            $vartype{$i} = '%s';
+            # print $i,"STRING","\n";
+        }  # String
+        elsif ($line =~ /(?:$i.+\d+)/)
+        {
+            $vartype{$i} = '%d';
+            # print $i,"INT","\n";
+        }  # Default Integer
+    }
 
     if (!handle_shebang($line))             # Handle Shebang line and move to the next line
     {next;}
@@ -868,8 +907,8 @@ while ($line = <>)
     if (!handle_comment($line))             # Handles Codes with Comments
     {next;}
 
-    $line = convert_dollar_hash($line);
-    $line = convert_ARGV($line);
+    $line = convert_dollar_hash($line);     # Converts $# to len()
+    $line = convert_ARGV($line);            # Converts ARGV to sys.argv[1:]
 
     if (!handle_print($line))               # Handles prints
     {next;}
@@ -1008,3 +1047,4 @@ foreach $i (@pyarray)
         $pytabindent++;
     }
 }
+# print %vartype;

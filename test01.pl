@@ -1,5 +1,5 @@
 #!/usr/bin/perl -w
-# Test file to show some control statements
+# Test file to show some nested control statements
 
 $i = 0;
 
@@ -10,7 +10,7 @@ if ( $i == 0)
 
 print "C way\n";
 
-for ($i=4; $i < 10 ; $i++)
+for ($i=4; $i < 6 ; $i++)
 {
 	print "$i\n";
 	for ($j=10; $j < 12 ; $j++)
@@ -36,7 +36,7 @@ for $i (4..9)
 
 print "C way the 2nd TIME\n";
 
-for ($i=4; $i < 10 ; $i++)
+for ($i=4; $i < 6 ; $i++)
 {
 	print "$i\n";
 	for ($j=10; $j < 12 ; $j++)

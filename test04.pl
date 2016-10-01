@@ -1,2 +1,11 @@
 #!/usr/bin/perl -w
-# put your demo script here
+# Test script to read lines from files or STDIN
+
+my @arr;
+
+while ($line = <>)
+{
+	push @arr, $line;
+}
+
+print @arr;

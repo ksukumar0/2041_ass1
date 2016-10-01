@@ -39,6 +39,11 @@ print (('|').join(('|').join(var).split('a')))
 g = 1
 
 print ("%s" %var[g])
+
+a = 3;
+b = 5;
+c = a%b
+print ( c )
 # var = "abcadae"
 # var = re.sub("[aeiou]","",var)
 # print (var)
