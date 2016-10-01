@@ -873,6 +873,54 @@ sub handle_chomp
 return $transformed;
 }
 
+sub handle_complex_closebrace
+{
+    my ($line, $endbracesflag) = @_;
+    ##### To detect statements with } in the same line #####
+    if ( $line =~ /^.*}\s*$/)
+    {
+        $line =~ s/^\t*\s*//;
+
+        if ( $line =~ /^(.*)}\s*$/ )
+        {
+            if ($1 ne "")
+            {
+                $line = $1."\n";
+                $endbracesflag = 1;
+            }
+            else
+            {
+                $endbracesflag = 0;
+            }
+        }
+    }
+    return ($line, $endbracesflag);
+}
+
+##### Assign var types #####
+
+sub assignvartypes
+{
+    my ($line) = @_;
+    my @var;
+    @var = $line =~ /\$(\w+)/g;     # Extracting variable names
+    foreach $i (@var)               # this loop determines the variable type and places them in a hash
+    {
+        if ($line =~ /$i.+\./)
+        {
+            $vartype{$i} = '%f';
+        }  # Float
+        elsif ($line =~ /(?:$i.+\".*\")|($i.+\w+)/)
+        {
+            $vartype{$i} = '%s';
+        }  # String
+        elsif ($line =~ /(?:$i.+\d+)/)
+        {
+            $vartype{$i} = '%d';
+        }  # Default Integer
+    }
+}
+
 ##### Main Code starts here... #####
 
 my $tmp = "";
@@ -888,47 +936,9 @@ while ($line = <>)
     chomp $line;
     $endbracesflag = 0;
 
-##### To detect statements with } in the same line #####
-    if ( $line =~ /^.*}\s*$/)
-    {
-        $line =~ s/^\t*\s*//;
+    ($line, $endbracesflag) = handle_complex_closebrace($line, $endbracesflag);
 
-        if ( $line =~ /^(.*)}\s*$/ )
-        {
-            if ($1 ne "")
-            {
-                $line = $1."\n";
-                $endbracesflag = 1;
-                # print $1,"\n";
-                # print $line," ", $1,"\n";
-            }
-            else
-            {
-                # $line =~ s/\s*}$/}\n/;
-                $endbracesflag = 0;
-            }
-        }
-    }
-
-    my @var;
-    @var = $line =~ /\$(\w+)/g;    # Extracting variable names
-    foreach $i (@var)               # this loop determines the variable type and places them in a hash
-    {
-        if ($line =~ /$i.+\./)
-            {$vartype{$i} = '%f';
-        # print $i,"FLOAT","\n";
-            }  # Float
-        elsif ($line =~ /(?:$i.+\".*\")|($i.+\w+)/)
-        {
-            $vartype{$i} = '%s';
-            # print $i,"STRING","\n";
-        }  # String
-        elsif ($line =~ /(?:$i.+\d+)/)
-        {
-            $vartype{$i} = '%d';
-            # print $i,"INT","\n";
-        }  # Default Integer
-    }
+    assignvartypes($line);                  # Determine var types
 
     if (!handle_shebang($line))             # Handle Shebang line and move to the next line
     {next;}

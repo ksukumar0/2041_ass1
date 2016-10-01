@@ -15,12 +15,10 @@ for ($i=4; $i < 6 ; $i++)
 	print "$i\n";
 	for ($j=10; $j < 12 ; $j++){
 		print "$j\n";
-		if ( $j == 15 ){
+		if ( $j == 15 )	{
+			print "";		}
+		else				{
 			print "";}
-		else
-		{
-			print "";
-		}
 	}
 }
 
