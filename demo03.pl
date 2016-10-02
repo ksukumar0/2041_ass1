@@ -1,9 +1,8 @@
 #!/usr/bin/perl -w
-# put your demo script here
+# Demo script to print the total number of lines entered in STDIN or file input
 
 $line_count = 0;
-while (1) {
-    $line = <STDIN>;
+while ($line = <>) {
     if (!$line)
     {last;}
     $line_count++;

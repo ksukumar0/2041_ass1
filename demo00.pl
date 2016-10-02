@@ -1,5 +1,6 @@
 #!/usr/bin/perl -w
-# Test file to print numbers and strings
+# Test file to Substitute Hermione with Harry
+# Taken from lecture example /home/cs2041//public_html/16s2/code/perl/gender_reversal.4.pl
 
 
 while ($line = <>) {

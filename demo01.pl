@@ -9,13 +9,13 @@ $total = 0;
 print join(",", @numbers);
 
 foreach $number (@numbers) {
-	if ($number ne '') {
+	if (( $number ne '') && ($number >= 0) ) {
 		$total += $number;
 		$n++;
 	}
 }
 
 if (@numbers) {
-	$a = $total/$n
-	print "$n numbers: total $total mean is $a";
+	print "$n numbers: total $total mean is";
+	print $total/$n;
 }

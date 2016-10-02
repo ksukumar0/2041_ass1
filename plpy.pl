@@ -34,8 +34,8 @@ my $poprgx = qr/pop\s*\(?\s*@?([\w:\[\]\.]+)\s*\)?/;
 my $pushrgx = qr/push\s*\(?\s*@?([\w:\[\]\.]+)\s*,\s*[@\$]?([\w:\[\]\.]+)\s*\)?/;
 my $shiftrgx = qr/shift\s*\(?@?([\w:\[\]\.]+)/;
 # my $joinrgx = qr/join\s*\(\s*([^(join)]*?)\s*,\s*(?:(?:\(?\s*@?(\w+)\s*\)?)|\((.*?)\))\s*\)/;
-my $joinrgx = qr/join\s*\(\s*([^(join)]*?)\s*,\s*\(?\s*@?([\w\.\[\]:]+)\s*\)/;
-# my $joinrgx = qr/join\s*\(\s*((?:(?!join).)*)\s*,\s*\(?\s*@?([\w\.\[\]:]+)\s*\)/;
+# my $joinrgx = qr/join\s*\(\s*([^(join)]*?)\s*,\s*\(?\s*@?([\w\.\[\]:]+)\s*\)/;
+my $joinrgx = qr/join\s*\(\s*((?:(?!join).)*)\s*,\s*\(?\s*@?([\w\.\[\]:]+)\s*\)/;
 my $splitrgx = qr/split\s*\(?\s*\/((?:(?!split).)*)\/\s*,\s*[\@\$](\w+)\s*,?\,\s*(\d+)\s*\)?/;
 my $splitrgxnolimit = qr/split\s*\(?\s*\/((?:(?!split).)*)\/\s*,\s*[\@\$](\w+)\s*,?\,?\s*\)?/;
 my $reversergx = qr/reverse\s*@?([\w.:\[\]]+)/;
@@ -96,14 +96,18 @@ sub handle_print
 
 ##### Handle any join/split/shift/etc... #####
 
+if ( $trans =~ /print/)
+{
+
 ##### Join #####
 
     if ($trans =~ /$joinrgx/)
     {
         $trans =~ s/$joinrgx/\($1\)\.join\($2\)/g;
         $trans =~ s/,\s*\"\\n\"\s*;\s*$//;
+        $trans =~ s/\s*;\s*$//;        
         $trans =~ s/print(.*)/print\($1\)/;
-        push @pyarray,$trans;
+        push @pyarray,$trans."\n";
         return 0;
     }
 
@@ -160,7 +164,7 @@ sub handle_print
     {
         $trans = handle_scalar($trans);
     }
-
+}
 ##### print simple variables if the line only has variables without newline #####
     if ($trans =~ /$print_only_var_without_nl_regex/)
     {
