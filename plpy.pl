@@ -59,6 +59,24 @@ my @cmdarr;
 my $cmd = join ('|', values (%arraymanipulatecmds));
 my @x1y1z1bg1;
 
+
+my $endbrace = qr/#*\s*}\s*$/;
+my $bracescount=0;
+my @Cstylebraccnt;
+my $indent = "\t";
+
+my %stdinvariables;
+my %arithmeticops = (
+    "gt" => ">",
+    "lt" => "<",
+    "le" => "<=",
+    "ge" => ">=",
+    "eq" => "==",
+    "ne" => "!=",
+    );
+my $allarithops = join ('|', values(%arithmeticops));
+
+
 sub handle_shebang
 {
     my ($trans) = @_;
@@ -209,7 +227,6 @@ if ( $trans =~ /print/)
             {
                 $vartype{$1} = '%d';  
             }
-
             $variable_print =~ s/$variable_in_print_regex/$vartype{$1}/ge;
             $variable_print =~ s/\)[;\s]*$//;
 
@@ -613,9 +630,11 @@ sub handle_variable
         {
             if ($trans =~ /$i.+\./)
                 {$vartype{$i} = '%f';}  # Float
-            elsif ($trans =~ /(?:$i.+\".*\")|($i.+\w+)/)
+            elsif ($trans =~ /(?:$i.+\".*\")|($i[^+|-|%|*]*\w+)/)
                 {$vartype{$i} = '%s';}  # String
             else
+                {$vartype{$i} = '%d';}  # Default Integer
+            if ($trans =~ /(?:$allarithops)|(?:\+=|-=|\*=|\*\*=|\/=|%=)/)
                 {$vartype{$i} = '%d';}  # Default Integer
         }
         $t3 = 0;
@@ -868,7 +887,8 @@ sub handle_controlstatements
 
 
 if ($transformed == 0)
-{push (@pyarray,$trans."\n");}
+{   $trans =~ s/@(\w+)/$1/g;
+    push (@pyarray,$trans."\n");}
 
 return $transformed;
 }
@@ -923,6 +943,8 @@ sub assignvartypes
     @var = $line =~ /\$(\w+)/g;     # Extracting variable names
     foreach $i (@var)               # this loop determines the variable type and places them in a hash
     {
+        if ( $line =~ /print/)
+            {next;}
         if ($line =~ /$i.+\./)
         {
             $vartype{$i} = '%f';
@@ -990,22 +1012,6 @@ while ($line = <>)
 
     push (@pyarray , "#".$line."\n");       # else comment the code and print it out
 }
-
-my $endbrace = qr/#*\s*}\s*$/;
-my $bracescount=0;
-my @Cstylebraccnt;
-my $indent = "\t";
-
-my %stdinvariables;
-my %arithmeticops = (
-    "gt" => ">",
-    "lt" => "<",
-    "le" => "<=",
-    "ge" => ">=",
-    "eq" => "==",
-    "ne" => "!=",
-    );
-my $allarithops = join ('|', values(%arithmeticops));
 
 ##### Assess the type of the STDIN if any at all ######
 

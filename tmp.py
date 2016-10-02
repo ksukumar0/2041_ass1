@@ -1,12 +1,9 @@
 #!/usr/local/bin/python3.5 -u
 import sys
-# put your demo script here
-
+# Test file to show some control statements
 lines=[]
-
 for line in sys.stdin:
-	
 	lines.append(line)
-
-lines.reverse()
-print(lines,end="")
+while (lines):
+	line=lines.pop()
+	print(line,end="")

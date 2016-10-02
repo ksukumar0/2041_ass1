@@ -1,21 +1,12 @@
 #!/usr/bin/perl -w
-# Test file to show some control statements
+# Test file to print in reverse modified from the lecture examples
+# /home/cs2041//public_html/16s2/code/perl/reverse_lines.4.pl
 
-@input_text_array = <>;
-$input_text_array = join ("", @input_text_array);
-$total = 0;
-
-@numbers = split(/\D+/, $input_text_array);
-print join(",", @numbers);
-
-foreach $number (@numbers) {
-	if (( $number ne '') && ($number >= 0) ) {
-		$total += $number;
-		$n++;
-	}
+my @lines;
+while ($line = <STDIN>) {
+    push @lines, $line;
 }
-
-if (@numbers) {
-	print "$n numbers: total $total mean is";
-	print $total/$n;
+while (@lines) {
+    my $line = pop @lines;
+    print $line;
 }

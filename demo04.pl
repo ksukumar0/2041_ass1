@@ -1,5 +1,5 @@
 #!/usr/bin/perl -w
-# put your demo script here
+# Prints lines in reverse
 
 my @lines;
 

@@ -1,3 +1,12 @@
+Karthik Sukumar	Sun Oct 2 20:18:17 2016 +1100	Added Test files except demo01.pl
+Karthik Sukumar	Sat Oct 1 22:13:50 2016 +1000	fixed this time
+Karthik Sukumar	Sat Oct 1 22:11:39 2016 +1000	[Bug Fix]
+Karthik Sukumar	Sat Oct 1 22:09:23 2016 +1000	[Bug Fix] minor fix for join in print
+Karthik Sukumar	Sat Oct 1 22:02:25 2016 +1000	Minor modifications but largely getting demo scripts ready for assessment
+Karthik Sukumar	Sat Oct 1 14:31:35 2016 +1000	Modified Test scripts and added demo03.pl, handle more weirdly formated braces
+Karthik Sukumar	Sat Oct 1 13:39:10 2016 +1000	Seperated blocks of code in main into sub routines namely assinvartypes and handle_complex_closebraces
+Karthik Sukumar	Sat Oct 1 13:17:42 2016 +1000	[Feature] handles braces at the end of a statement on the same line
+Karthik Sukumar	Sat Oct 1 12:19:33 2016 +1000	Added test scripts and included array initialisation in plpy.pl e.g: my @arr = ('a','b','c') => arr = ['a','b','c']
 Karthik Sukumar	Sat Oct 1 10:33:19 2016 +1000	Made the split and join regexes more robust
 Karthik Sukumar	Fri Sep 30 23:29:12 2016 +1000	Print statement reverted
 Karthik Sukumar	Fri Sep 30 23:27:09 2016 +1000	[Bug Fix] fixed the variable type interpolation issue
