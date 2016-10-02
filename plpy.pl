@@ -628,7 +628,7 @@ sub handle_variable
 
         foreach $i (@var)               # this loop determines the variable type and places them in a hash
         {
-            if ($trans =~ /$i.+\./)
+            if ($trans =~ /$i[^.]+\.(\d)/)
                 {$vartype{$i} = '%f';}  # Float
             elsif ($trans =~ /(?:$i.+\".*\")|($i[^+|-|%|*]*\w+)/)
                 {$vartype{$i} = '%s';}  # String
@@ -945,11 +945,11 @@ sub assignvartypes
     {
         if ( $line =~ /print/)
             {next;}
-        if ($line =~ /$i.+\./)
+        if ($line =~ /$i.+(\d)\.(\d)/)
         {
             $vartype{$i} = '%f';
         }  # Float
-        elsif ($line =~ /(?:$i.+\".*\")|($i.+\w+)/)
+        elsif ($line =~ /(?:$i.+\".*\")/)
         {
             $vartype{$i} = '%s';
         }  # String
